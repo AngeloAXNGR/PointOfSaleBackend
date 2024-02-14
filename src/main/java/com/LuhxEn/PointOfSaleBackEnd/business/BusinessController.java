@@ -1,0 +1,53 @@
+package com.LuhxEn.PointOfSaleBackEnd.business;
+
+import com.LuhxEn.PointOfSaleBackEnd.config.JwtService;
+import com.LuhxEn.PointOfSaleBackEnd.user.User;
+import com.LuhxEn.PointOfSaleBackEnd.user.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/businesses")
+@RequiredArgsConstructor
+public class BusinessController {
+	private final JwtService jwtService;
+	private final UserRepository userRepository;
+	private final BusinessRepository businessRepository;
+
+	@GetMapping
+	public ResponseEntity<List<Business>> all(HttpServletRequest request){
+		String authHeader = request.getHeader("Authorization");
+		String jwt = authHeader.substring(7);
+		Long userId = Long.valueOf(jwtService.extractId(jwt));
+		User user = userRepository.getReferenceById(userId);
+		return ResponseEntity.status(HttpStatus.OK).body(businessRepository.findByUser(user));
+	}
+
+	@GetMapping("/categories")
+	public ResponseEntity<BusinessCategory[]> getCategories(){
+		return ResponseEntity.status(HttpStatus.OK).body(BusinessCategory.values());
+	}
+
+	@PostMapping("/create")
+	public ResponseEntity<Business> addBusiness(HttpServletRequest request, @RequestBody Business business){
+		String authHeader = request.getHeader("Authorization");
+		String jwt = authHeader.substring(7);
+		Long userId = Long.valueOf(jwtService.extractId(jwt));
+		User user = userRepository.getReferenceById(userId);
+		var newBusiness = Business
+			.builder()
+			.businessName(business.getBusinessName())
+			.address(business.getAddress())
+			.contactNumber(business.getContactNumber())
+			.user(user)
+			.build();
+
+		businessRepository.save(newBusiness);
+		return ResponseEntity.status(HttpStatus.OK).body(newBusiness);
+	}
+}
