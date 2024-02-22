@@ -3,6 +3,7 @@ package com.LuhxEn.PointOfSaleBackEnd.exception;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,7 +17,7 @@ public class CustomExceptionHandler {
 
 	@ExceptionHandler(UserNotFoundException.class)
 	public ResponseEntity<Map<String,?>> handleUserNotFoundException(UserNotFoundException ex){
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ex.getMessage()));
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)
@@ -25,6 +26,11 @@ public class CustomExceptionHandler {
 			.map(ConstraintViolation::getMessage).toList();
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", errors));
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<Map<String,?>> handleDataIntegrityViolationException(DataIntegrityViolationException ex){
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
 	}
 
 }
