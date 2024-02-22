@@ -4,6 +4,7 @@ import com.LuhxEn.PointOfSaleBackEnd.config.JwtService;
 import com.LuhxEn.PointOfSaleBackEnd.user.User;
 import com.LuhxEn.PointOfSaleBackEnd.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/businesses")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class BusinessController {
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
@@ -26,11 +28,6 @@ public class BusinessController {
 		Long userId = Long.valueOf(jwtService.extractId(jwt));
 		User user = userRepository.getReferenceById(userId);
 		return ResponseEntity.status(HttpStatus.OK).body(businessRepository.findByUser(user));
-	}
-
-	@GetMapping("/categories")
-	public ResponseEntity<BusinessCategory[]> getCategories(){
-		return ResponseEntity.status(HttpStatus.OK).body(BusinessCategory.values());
 	}
 
 	@PostMapping("/create")
@@ -50,4 +47,25 @@ public class BusinessController {
 		businessRepository.save(newBusiness);
 		return ResponseEntity.status(HttpStatus.OK).body(newBusiness);
 	}
+
+	@PutMapping("/update/{id}")
+	public ResponseEntity<Business> updateBusiness(@PathVariable Long id, @RequestBody Business business){
+		return businessRepository.findById(id).map(business1 -> {
+			business1.setBusinessName(business.getBusinessName());
+			business1.setAddress(business.getAddress());
+			business1.setContactNumber(business.getContactNumber());
+			Business updatedBusiness = businessRepository.save(business1);
+
+			return ResponseEntity.status(HttpStatus.OK).body(updatedBusiness);
+		}).orElseGet(() -> ResponseEntity.notFound().build());
+
+	}
+
+
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<String> deleteBusiness(@PathVariable Long id){
+		businessRepository.deleteById(id);
+		return ResponseEntity.status(HttpStatus.OK).body("Business with the id of: " + id + " was deleted");
+	}
+
 }
