@@ -1,6 +1,7 @@
 package com.LuhxEn.PointOfSaleBackEnd.exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,6 +21,17 @@ public class CustomExceptionHandler {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ex.getMessage()));
 	}
 
+	@ExceptionHandler(BusinessNotFoundException.class)
+	public ResponseEntity<Map<String,?>> handleBusinessNotFoundException(BusinessNotFoundException ex){
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
+	@ExceptionHandler(CategoryNotFoundException.class)
+	public ResponseEntity<Map<String,?>> handleCategoryNotFoundException(CategoryNotFoundException ex){
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
+
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<Map<String,?>> handleConstraintViolationException(ConstraintViolationException ex){
 		List<String> errors = ex.getConstraintViolations().stream()
@@ -31,6 +43,11 @@ public class CustomExceptionHandler {
 	@ExceptionHandler(DataIntegrityViolationException.class)
 	public ResponseEntity<Map<String,?>> handleDataIntegrityViolationException(DataIntegrityViolationException ex){
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
+	@ExceptionHandler(EntityNotFoundException.class)
+	public ResponseEntity<Map<String,?>>handleEntityNotFoundException(EntityNotFoundException ex){
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
 	}
 
 }
