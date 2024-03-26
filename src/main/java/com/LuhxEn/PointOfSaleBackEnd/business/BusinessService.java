@@ -46,7 +46,7 @@ public class BusinessService {
 		return ResponseEntity.status(HttpStatus.OK).body(newBusiness);
 	}
 
-	public ResponseEntity<Business> updateBusiness(@PathVariable Long id, @RequestBody Business business){
+	public ResponseEntity<Business> updateBusiness(Long id, Business business){
 		return businessRepository.findById(id).map(business1 -> {
 			business1.setBusinessName(business.getBusinessName());
 			business1.setAddress(business.getAddress());
@@ -58,7 +58,7 @@ public class BusinessService {
 
 	}
 
-	public ResponseEntity<String> deleteBusiness(@PathVariable Long id){
+	public ResponseEntity<String> deleteBusiness(Long id){
 		Optional<Business> businessOptional = businessRepository.findById(id);
 		if(businessOptional.isEmpty()){
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Business with the id of " + id + " was not found.");

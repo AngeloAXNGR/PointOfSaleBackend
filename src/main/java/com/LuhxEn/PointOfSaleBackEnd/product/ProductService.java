@@ -25,13 +25,13 @@ public class ProductService {
 	private final ProductRepository productRepository;
 
 
-	public ResponseEntity<List<Product>> getProducts(@PathVariable Long businessId){
+	public ResponseEntity<List<Product>> getProducts(Long businessId){
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		List<Product> products = new ArrayList<>(selectedBusiness.getProducts());
 		return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 
-	public ResponseEntity<Product> addProduct(@PathVariable Long businessId, @RequestBody Product product){
+	public ResponseEntity<Product> addProduct(Long businessId, Product product){
 		Product newProduct = businessRepository.findById(businessId).map(business -> {
 			business.getProducts().add(product);
 			return categoryRepository.findById(product.getCategoryId()).map(category -> {
@@ -42,7 +42,7 @@ public class ProductService {
 		return ResponseEntity.status(HttpStatus.OK).body(newProduct);
 	}
 
-	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
+	public ResponseEntity<Product> updateProduct(Long id, Product product){
 		return productRepository.findById(id).map(product1 -> {
 			product1.setProductName(product.getProductName());
 			product1.setCategoryId(product.getCategoryId());
@@ -57,7 +57,7 @@ public class ProductService {
 		}).orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
-	public ResponseEntity<String> deleteProduct(@PathVariable Long id){
+	public ResponseEntity<String> deleteProduct(Long id){
 		Optional<Product> productOptional = productRepository.findById(id);
 		if(productOptional.isEmpty()){
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product with the id of " + id + " was not found.");

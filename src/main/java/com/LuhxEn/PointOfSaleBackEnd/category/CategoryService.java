@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class CategoryService {
 	private final CategoryRepository categoryRepository;
 	private final BusinessRepository businessRepository;
-	public ResponseEntity<List<CategoryDTO>> getCategories(@PathVariable Long businessId){
+	public ResponseEntity<List<CategoryDTO>> getCategories(Long businessId){
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		List<CategoryDTO> categories = selectedBusiness.getCategories().stream()
 			.map(this::mapToCategoryDTO)
@@ -29,7 +29,7 @@ public class CategoryService {
 	}
 
 
-	public ResponseEntity<Category> addCategory(@PathVariable Long businessId, @RequestBody Category category){
+	public ResponseEntity<Category> addCategory(Long businessId, Category category){
 		Category newCategory = businessRepository.findById(businessId).map(business -> {
 			business.getCategories().add(category);
 			return categoryRepository.save(category);
@@ -39,7 +39,7 @@ public class CategoryService {
 	}
 
 
-	public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category category){
+	public ResponseEntity<Category> updateCategory(Long id, Category category){
 		return categoryRepository.findById(id).map(category1 -> {
 			category1.setCategoryName(category.getCategoryName());
 			Category updatedCategory = categoryRepository.save(category1);
@@ -48,7 +48,7 @@ public class CategoryService {
 	}
 
 
-	public ResponseEntity<String> deleteCategory(@PathVariable Long id){
+	public ResponseEntity<String> deleteCategory(Long id){
 		Optional<Category> categoryOptional = categoryRepository.findById(id);
 		if(categoryOptional.isEmpty()){
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category with the id of " + id + " was not found.");
