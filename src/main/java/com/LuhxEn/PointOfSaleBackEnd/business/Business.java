@@ -3,6 +3,7 @@ package com.LuhxEn.PointOfSaleBackEnd.business;
 
 import com.LuhxEn.PointOfSaleBackEnd.category.Category;
 import com.LuhxEn.PointOfSaleBackEnd.product.Product;
+import com.LuhxEn.PointOfSaleBackEnd.sale.Sale;
 import com.LuhxEn.PointOfSaleBackEnd.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -39,6 +40,10 @@ public class Business {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "business_id")
 	private Set<Product> products = new HashSet<>();
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@JoinColumn(name = "business_id")
+	private Set<Sale> sales = new HashSet<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
