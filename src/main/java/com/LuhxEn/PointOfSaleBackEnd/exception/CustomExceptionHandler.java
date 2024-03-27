@@ -31,6 +31,10 @@ public class CustomExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
 	}
 
+	@ExceptionHandler(InsufficientStockException.class)
+	public ResponseEntity<Map<String,?>> handleInsufficientStockException(InsufficientStockException ex){
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
 
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<Map<String,?>> handleConstraintViolationException(ConstraintViolationException ex){
