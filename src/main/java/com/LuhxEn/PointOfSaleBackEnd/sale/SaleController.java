@@ -16,4 +16,9 @@ public class SaleController {
 	public ResponseEntity<SaleResponseDTO> createSale(@PathVariable Long businessId, @RequestBody List<SaleRequestDTO> saleRequestDTOs){
 		return saleService.createSale(businessId, saleRequestDTOs);
 	}
+
+	@GetMapping("/{businessId}")
+	public ResponseEntity<List<SaleResponseDTO>> getAllSales(@PathVariable Long businessId) {
+		return saleService.getAllSales(businessId);
+	}
 }

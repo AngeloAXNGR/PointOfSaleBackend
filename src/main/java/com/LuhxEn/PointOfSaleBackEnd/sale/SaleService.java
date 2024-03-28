@@ -4,6 +4,7 @@ import com.LuhxEn.PointOfSaleBackEnd.business.Business;
 import com.LuhxEn.PointOfSaleBackEnd.business.BusinessRepository;
 import com.LuhxEn.PointOfSaleBackEnd.exception.BusinessNotFoundException;
 import com.LuhxEn.PointOfSaleBackEnd.exception.InsufficientStockException;
+import com.LuhxEn.PointOfSaleBackEnd.exception.ProductNotFoundException;
 import com.LuhxEn.PointOfSaleBackEnd.product.Product;
 import com.LuhxEn.PointOfSaleBackEnd.product.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,10 +45,8 @@ public class SaleService {
 			Long productId = saleRequestDTO.getProductId();
 			int quantity = saleRequestDTO.getQuantity();
 
-			// TODO: Replace RuntimeException
-			Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product Not Found"));
+			Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException("Product Not Found"));
 
-			// TODO: Add quantity validation
 			// update stock of that product (Reduce stocks based on specified quantity
 			int newStock = product.getStock() - quantity;
 
@@ -100,4 +101,44 @@ public class SaleService {
 
 		return ResponseEntity.status(HttpStatus.OK).body(saleResponseDTO);
 	}
+
+	public ResponseEntity<List<SaleResponseDTO>> getAllSales(Long businessId) {
+		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+		List<Sale> sales = new ArrayList<>(selectedBusiness.getSales());
+
+		List<SaleResponseDTO> saleResponseDTOs = sales.stream()
+			.map(sale -> {
+				SaleResponseDTO saleResponseDTO = new SaleResponseDTO();
+				saleResponseDTO.setSaleId(sale.getId());
+				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getProducts()));
+				saleResponseDTO.setGrandTotal(calculateTotal(sale.getProducts()));
+				return saleResponseDTO;
+			})
+			.collect(Collectors.toList());
+
+		return ResponseEntity.ok(saleResponseDTOs);
+	}
+
+	// Helper method to convert products to DTOs
+	private List<ProductListDTO> convertProductsToDTOs(Set<Product> products) {
+		return products.stream()
+			.map(product -> {
+				ProductListDTO productListDTO = new ProductListDTO();
+				productListDTO.setProductId(product.getId());
+				productListDTO.setProductName(product.getProductName());
+				productListDTO.setQuantity(1); // Assuming quantity is always 1 for fetching sales
+				productListDTO.setSubtotal(product.getSellingPrice()); // Assuming no quantity-based calculation here
+				return productListDTO;
+			})
+			.collect(Collectors.toList());
+	}
+
+	// Helper method to calculate total sale amount
+	private double calculateTotal(Set<Product> products) {
+		return products.stream()
+			.mapToDouble(Product::getSellingPrice) // Assuming no quantity-based calculation here
+			.sum();
+	}
+
 }
+
