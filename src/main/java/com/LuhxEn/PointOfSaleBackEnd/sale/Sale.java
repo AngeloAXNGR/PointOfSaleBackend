@@ -1,11 +1,11 @@
 package com.LuhxEn.PointOfSaleBackEnd.sale;
 
-import com.LuhxEn.PointOfSaleBackEnd.product.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,18 +17,10 @@ public class Sale {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	private Date transactionDate;
 
-	@ManyToMany(
-		fetch = FetchType.LAZY,
-		cascade = {
-			CascadeType.PERSIST,
-			CascadeType.MERGE
-		}
-	)
-	@JoinTable(
-		name = "products_list", // Junction Table
-		joinColumns = {@JoinColumn(name = "sale_id")},
-		inverseJoinColumns = {@JoinColumn(name = "product_id")}
-	)
-	private Set<Product> products = new HashSet<>();
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@JoinColumn(name = "sale_id")
+	private Set<SaleProduct> saleProduct = new HashSet<>();
+
 }

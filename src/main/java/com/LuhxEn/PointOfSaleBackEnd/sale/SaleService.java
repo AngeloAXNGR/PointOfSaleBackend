@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,80 +28,90 @@ public class SaleService {
 
 
 	@Transactional // Should some db query operations fail, the process of creating a sale would fail altogether to ensure ACID compliance
-	public ResponseEntity<SaleResponseDTO> createSale(Long businessId, List<SaleRequestDTO> saleRequestDTOs){
-		Business business = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+	public ResponseEntity<SaleResponseDTO> createSale(Long businessId, List<SaleRequestDTO> saleRequestDTOs) {
+		// Creating a reference of the business, used to associate the sale data later on
+		Business business = businessRepository.findById(businessId)
+			.orElseThrow(() -> new BusinessNotFoundException("Business not found"));
 
-		// instantiate Sale object
+		// Instantiate Sale object
 		Sale sale = new Sale();
+
+		// Initial Sale GrandTotal (To be recomputed later)
 		double grandTotal = 0;
 
+		// Set transaction date to the current date and time
+		sale.setTransactionDate(new Date());
+
+		// Create an empty arraylist of type ProductListDTO
 		List<ProductListDTO> productListDTOs = new ArrayList<>();
 
-		// After updating stocks of certain products in the for loop, we place those
-		// objects in updatedProducts
-		List<Product> updatedProducts = new ArrayList<>();
+		// Loop through the request body (list of SaleRequestDTO objects)
+		for (SaleRequestDTO saleRequestDTO : saleRequestDTOs) {
 
-		// loop through the request body (which is an array SaleRequestDTO objects)
-		for(SaleRequestDTO saleRequestDTO: saleRequestDTOs){
 			Long productId = saleRequestDTO.getProductId();
 			int quantity = saleRequestDTO.getQuantity();
 
-			Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException("Product Not Found"));
+			// Retrieve product from database
+			Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-			// update stock of that product (Reduce stocks based on specified quantity
+			// Update stock of the product and check for sufficient stock
 			int newStock = product.getStock() - quantity;
-
 			if (newStock < 0) {
-				throw new InsufficientStockException("Product does not have enough stocks");
+				throw new InsufficientStockException("Product does not have enough stock");
 			}
 
 			product.setStock(newStock);
 
-
-			// Use saveAll instead outside the for loop
-			// Save the updated product
-			// productRepository.save(product);
-
+			// Calculate subtotal for the product
 			double subtotal = quantity * product.getSellingPrice();
-			ProductListDTO productListDTO = ProductListDTO
-				.builder()
+
+			// Create ProductListDTO to represent the product in the response
+			ProductListDTO productListDTO = ProductListDTO.builder()
 				.productId(product.getId())
 				.productName(product.getProductName())
 				.quantity(quantity)
 				.subtotal(subtotal)
 				.build();
 
+			// after creating ProductListDTO object, we add that to the arraylist we defined earlier
 			productListDTOs.add(productListDTO);
 
-			// Increment total
+			// Increment total grand total
 			grandTotal += subtotal;
 
-			// Add the product to the sale's products
-			sale.getProducts().add(product);
+			// Create SaleProduct entity to represent the association between sale and product
+			SaleProduct saleProduct = new SaleProduct();
+			saleProduct.setQuantity(quantity);
 
-			// add the updated products in the ArrayList called updatedProducts
-			updatedProducts.add(product);
+			// Reference of sale to saleProduct
+			sale.getSaleProduct().add(saleProduct);
+
+			// Reference of product to saleProduct;
+			saleProduct.setProduct(product);
 		}
 
-		// Saving changes of products in batch
-		productRepository.saveAll(updatedProducts);
-
-		// Save the sale entity
+		// Save the sale entity along with associated sale products
 		sale = saleRepository.save(sale);
 
+		// Add the sale reference to the business
 		business.getSales().add(sale);
 
+		// Update the business in the database
 		businessRepository.save(business);
 
-		SaleResponseDTO saleResponseDTO = SaleResponseDTO
-			.builder()
+		// Create and return the SaleResponseDTO
+		SaleResponseDTO saleResponseDTO = SaleResponseDTO.builder()
 			.saleId(sale.getId())
 			.products(productListDTOs)
+			.transactionDate(sale.getTransactionDate())
 			.grandTotal(grandTotal)
 			.build();
 
-		return ResponseEntity.status(HttpStatus.OK).body(saleResponseDTO);
+		return ResponseEntity.ok(saleResponseDTO);
 	}
+
+
 
 	public ResponseEntity<List<SaleResponseDTO>> getAllSales(Long businessId) {
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
@@ -110,8 +121,9 @@ public class SaleService {
 			.map(sale -> {
 				SaleResponseDTO saleResponseDTO = new SaleResponseDTO();
 				saleResponseDTO.setSaleId(sale.getId());
-				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getProducts()));
-				saleResponseDTO.setGrandTotal(calculateTotal(sale.getProducts()));
+				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
+				saleResponseDTO.setTransactionDate(sale.getTransactionDate());
+				saleResponseDTO.setGrandTotal(calculateTotal(sale.getSaleProduct()));
 				return saleResponseDTO;
 			})
 			.collect(Collectors.toList());
@@ -120,25 +132,39 @@ public class SaleService {
 	}
 
 	// Helper method to convert products to DTOs
-	private List<ProductListDTO> convertProductsToDTOs(Set<Product> products) {
-		return products.stream()
-			.map(product -> {
+	private List<ProductListDTO> convertProductsToDTOs(Set<SaleProduct> saleProducts) {
+		return saleProducts.stream()
+			.map(saleProduct -> {
+				Product product = saleProduct.getProduct();
 				ProductListDTO productListDTO = new ProductListDTO();
 				productListDTO.setProductId(product.getId());
 				productListDTO.setProductName(product.getProductName());
-				productListDTO.setQuantity(1); // Assuming quantity is always 1 for fetching sales
-				productListDTO.setSubtotal(product.getSellingPrice()); // Assuming no quantity-based calculation here
+				productListDTO.setQuantity(getQuantity(product.getId(), saleProducts)); // Assuming quantity is always 1 for fetching sales
+				productListDTO.setSubtotal(product.getSellingPrice() * productListDTO.getQuantity()); // Assuming no quantity-based calculation here
 				return productListDTO;
 			})
 			.collect(Collectors.toList());
 	}
 
 	// Helper method to calculate total sale amount
-	private double calculateTotal(Set<Product> products) {
-		return products.stream()
-			.mapToDouble(Product::getSellingPrice) // Assuming no quantity-based calculation here
+	private double calculateTotal(Set<SaleProduct> saleProducts) {
+		return saleProducts.stream()
+			.mapToDouble(saleProduct -> {
+				Product product = saleProduct.getProduct(); // Retrieve the product from the SaleProduct
+				return product.getSellingPrice() * saleProduct.getQuantity(); // Calculate subtotal for the saleProduct
+			})
 			.sum();
 	}
+
+
+
+	// Helper method to get the quantity of a product sold in a sale
+	private int getQuantity(Long productId, Set<SaleProduct> saleProducts) {
+		return (int) saleProducts.stream()
+			.filter(saleProduct -> saleProduct.getProduct().getId().equals(productId))
+			.count();
+	}
+
 
 }
 
