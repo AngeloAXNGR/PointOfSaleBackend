@@ -160,9 +160,15 @@ public class SaleService {
 
 	// Helper method to get the quantity of a product sold in a sale
 	private int getQuantity(Long productId, Set<SaleProduct> saleProducts) {
-		return (int) saleProducts.stream()
-			.filter(saleProduct -> saleProduct.getProduct().getId().equals(productId))
-			.count();
+		int totalQuantity = 0;
+
+		for (SaleProduct saleProduct : saleProducts) {
+			if (saleProduct.getProduct().getId().equals(productId)) {
+				totalQuantity += saleProduct.getQuantity();
+			}
+		}
+
+		return totalQuantity;
 	}
 
 
