@@ -34,4 +34,6 @@ public class Product {
 	private Date expiration;
 	private int daysBeforeExpiration;
 
+	private boolean isDeleted;
+
 }
