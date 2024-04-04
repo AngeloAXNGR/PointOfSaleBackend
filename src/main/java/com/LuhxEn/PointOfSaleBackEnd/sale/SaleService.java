@@ -28,7 +28,12 @@ public class SaleService {
 
 
 	@Transactional // Should some db query operations fail, the process of creating a sale would fail altogether to ensure ACID compliance
-	public ResponseEntity<SaleResponseDTO> createSale(Long businessId, List<SaleRequestDTO> saleRequestDTOs) {
+	public ResponseEntity<?> createSale(Long businessId, List<SaleRequestDTO> saleRequestDTOs) {
+		if (saleRequestDTOs.isEmpty()) {
+			// Return a response indicating that the request is invalid
+			return ResponseEntity.badRequest().body("Bad Request");
+		}
+
 		// Creating a reference of the business, used to associate the sale data later on
 		Business business = businessRepository.findById(businessId)
 			.orElseThrow(() -> new BusinessNotFoundException("Business not found"));
