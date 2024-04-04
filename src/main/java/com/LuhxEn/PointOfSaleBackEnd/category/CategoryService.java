@@ -3,7 +3,12 @@ package com.LuhxEn.PointOfSaleBackEnd.category;
 import com.LuhxEn.PointOfSaleBackEnd.business.Business;
 import com.LuhxEn.PointOfSaleBackEnd.business.BusinessRepository;
 import com.LuhxEn.PointOfSaleBackEnd.exception.BusinessNotFoundException;
+import com.LuhxEn.PointOfSaleBackEnd.product.Product;
+import com.LuhxEn.PointOfSaleBackEnd.product.ProductRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,13 +24,35 @@ import java.util.stream.Collectors;
 public class CategoryService {
 	private final CategoryRepository categoryRepository;
 	private final BusinessRepository businessRepository;
-	public ResponseEntity<List<CategoryDTO>> getCategories(Long businessId){
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
-		List<CategoryDTO> categories = selectedBusiness.getCategories().stream()
-			.map(this::mapToCategoryDTO)
-			.collect(Collectors.toList());
+	private final ProductRepository productRepository;
 
-		return ResponseEntity.status(HttpStatus.OK).body(categories);
+	private final EntityManager entityManager;
+//	public ResponseEntity<List<CategoryDTO>> getCategories(Long businessId){
+//		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+//		List<CategoryDTO> categories = selectedBusiness.getCategories().stream()
+//			.map(this::mapToCategoryDTO)
+//			.collect(Collectors.toList());
+//
+//		return ResponseEntity.status(HttpStatus.OK).body(categories);
+//	}
+
+	public ResponseEntity<List<CategoryDTO>> getCategories(Long businessId){
+		Query query = entityManager.createNativeQuery(
+			"SELECT * FROM Category WHERE business_id = :businessId AND is_deleted = false", Category.class
+		);
+
+		query.setParameter("businessId", businessId);
+
+		@SuppressWarnings("unchecked")
+		List<Category> categories = query.getResultList();
+
+		List<CategoryDTO> categoryDTOS = categories
+			.stream()
+			.map(this::mapToCategoryDTO)
+			.toList();
+
+
+		return ResponseEntity.status(HttpStatus.OK).body(categoryDTOS);
 	}
 
 
@@ -49,13 +76,26 @@ public class CategoryService {
 
 
 	public ResponseEntity<String> deleteCategory(Long id){
-		Optional<Category> categoryOptional = categoryRepository.findById(id);
-		if(categoryOptional.isEmpty()){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category with the id of " + id + " was not found.");
-		}
+		// HARD DELETE
+//		Optional<Category> categoryOptional = categoryRepository.findById(id);
+//		if(categoryOptional.isEmpty()){
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category with the id of " + id + " was not found.");
+//		}
+//
+//		categoryRepository.deleteById(id);
+//		return ResponseEntity.status(HttpStatus.OK).body("Category with the id of " + id + " was deleted.");
 
-		categoryRepository.deleteById(id);
-		return ResponseEntity.status(HttpStatus.OK).body("Category with the id of " + id + " was deleted.");
+		// SOFT DELETE
+		return categoryRepository.findById(id).map(category -> {
+			category.setDeleted(true);
+			categoryRepository.save(category);
+
+			List<Product> products = new ArrayList<>(category.getProducts());
+			products.forEach(product -> product.setDeleted(true));
+			productRepository.saveAll(products);
+
+			return ResponseEntity.status(HttpStatus.OK).body("Category with the id of " + id + " has been deleted.");
+		}).orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	private CategoryDTO mapToCategoryDTO(Category category){

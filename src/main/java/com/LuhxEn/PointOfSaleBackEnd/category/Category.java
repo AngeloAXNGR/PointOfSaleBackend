@@ -29,4 +29,6 @@ public class Category {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "category_id")
 	private Set<Product> products = new HashSet<>();
+
+	private boolean isDeleted;
 }
