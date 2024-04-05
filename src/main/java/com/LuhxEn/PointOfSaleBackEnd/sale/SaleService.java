@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -165,6 +167,33 @@ public class SaleService {
 		}
 
 		return totalQuantity;
+	}
+
+
+	public ResponseEntity<List<SaleDTO.SaleResponse>> getSalesForToday(Long businessId) {
+		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+		List<Sale> sales = new ArrayList<>(selectedBusiness.getSales());
+
+		LocalDate today = LocalDate.now();
+		List<Sale> salesForToday = sales.stream()
+			.filter(sale -> {
+				LocalDate transactionDate = sale.getTransactionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				return transactionDate.equals(today);
+			})
+			.collect(Collectors.toList());
+
+		List<SaleDTO.SaleResponse> saleResponseDTOs = salesForToday.stream()
+			.map(sale -> {
+				SaleDTO.SaleResponse saleResponseDTO = new SaleDTO.SaleResponse();
+				saleResponseDTO.setSaleId(sale.getId());
+				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
+				saleResponseDTO.setTransactionDate(sale.getTransactionDate());
+				saleResponseDTO.setGrandTotal(sale.getGrandTotal());
+				return saleResponseDTO;
+			})
+			.collect(Collectors.toList());
+
+		return ResponseEntity.ok(saleResponseDTOs);
 	}
 
 
