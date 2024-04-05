@@ -41,4 +41,12 @@ public class SaleDTO {
 		private Date transactionDate;
 	}
 
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class TodayTotalSaleAmount{
+		private double totalSaleAmount;
+	}
+
 }

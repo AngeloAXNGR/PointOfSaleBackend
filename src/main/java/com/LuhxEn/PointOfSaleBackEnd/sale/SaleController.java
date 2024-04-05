@@ -23,8 +23,13 @@ public class SaleController {
 		return saleService.getAllSales(businessId);
 	}
 
-	@GetMapping("/{businessId}/est")
-	public ResponseEntity<List<SaleDTO.SaleResponse>>  getSalesForToday(@PathVariable Long businessId){
-		return saleService.getSalesForToday(businessId);
+//	@GetMapping("/{businessId}/est")
+//	public ResponseEntity<List<SaleDTO.SaleResponse>>  getSalesForToday(@PathVariable Long businessId){
+//		return saleService.getSalesForToday(businessId);
+//	}
+
+	@GetMapping("/{businessId}/todayTotalSaleAmount")
+	public ResponseEntity<SaleDTO.TodayTotalSaleAmount>  getTodayTotalSaleAmount(@PathVariable Long businessId){
+		return saleService.getTodayTotalSaleAmount(businessId);
 	}
 }

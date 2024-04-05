@@ -170,7 +170,33 @@ public class SaleService {
 	}
 
 
-	public ResponseEntity<List<SaleDTO.SaleResponse>> getSalesForToday(Long businessId) {
+//	public ResponseEntity<List<SaleDTO.SaleResponse>> getSalesForToday(Long businessId) {
+//		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+//		List<Sale> sales = new ArrayList<>(selectedBusiness.getSales());
+//
+//		LocalDate today = LocalDate.now();
+//		List<Sale> salesForToday = sales.stream()
+//			.filter(sale -> {
+//				LocalDate transactionDate = sale.getTransactionDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//				return transactionDate.equals(today);
+//			})
+//			.collect(Collectors.toList());
+//
+//		List<SaleDTO.SaleResponse> saleResponseDTOs = salesForToday.stream()
+//			.map(sale -> {
+//				SaleDTO.SaleResponse saleResponseDTO = new SaleDTO.SaleResponse();
+//				saleResponseDTO.setSaleId(sale.getId());
+//				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
+//				saleResponseDTO.setTransactionDate(sale.getTransactionDate());
+//				saleResponseDTO.setGrandTotal(sale.getGrandTotal());
+//				return saleResponseDTO;
+//			})
+//			.collect(Collectors.toList());
+//
+//		return ResponseEntity.ok(saleResponseDTOs);
+//	}
+
+	public ResponseEntity<SaleDTO.TodayTotalSaleAmount> getTodayTotalSaleAmount(Long businessId) {
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		List<Sale> sales = new ArrayList<>(selectedBusiness.getSales());
 
@@ -182,18 +208,15 @@ public class SaleService {
 			})
 			.collect(Collectors.toList());
 
-		List<SaleDTO.SaleResponse> saleResponseDTOs = salesForToday.stream()
-			.map(sale -> {
-				SaleDTO.SaleResponse saleResponseDTO = new SaleDTO.SaleResponse();
-				saleResponseDTO.setSaleId(sale.getId());
-				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
-				saleResponseDTO.setTransactionDate(sale.getTransactionDate());
-				saleResponseDTO.setGrandTotal(sale.getGrandTotal());
-				return saleResponseDTO;
-			})
-			.collect(Collectors.toList());
+		double overall = 0;
+		for(Sale sale : salesForToday){
+			overall += sale.getGrandTotal();
+		}
 
-		return ResponseEntity.ok(saleResponseDTOs);
+		SaleDTO.TodayTotalSaleAmount todayOverallSale = new SaleDTO.TodayTotalSaleAmount();
+		todayOverallSale.setTotalSaleAmount(overall);
+
+		return ResponseEntity.status(HttpStatus.OK).body(todayOverallSale);
 	}
 
 
