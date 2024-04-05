@@ -28,7 +28,7 @@ public class SaleService {
 
 
 	@Transactional // Should some db query operations fail, the process of creating a sale would fail altogether to ensure ACID compliance
-	public ResponseEntity<?> createSale(Long businessId, List<SaleRequestDTO> saleRequestDTOs) {
+	public ResponseEntity<?> createSale(Long businessId, List<SaleDTO.SaleRequest> saleRequestDTOs) {
 		if (saleRequestDTOs.isEmpty()) {
 			// Return a response indicating that the request is invalid
 			return ResponseEntity.badRequest().body("Bad Request");
@@ -48,10 +48,10 @@ public class SaleService {
 		sale.setTransactionDate(new Date());
 
 		// Create an empty arraylist of type ProductListDTO
-		List<ProductListDTO> productListDTOs = new ArrayList<>();
+		List<SaleDTO.ProductList> productListDTOs = new ArrayList<>();
 
 		// Loop through the request body (list of SaleRequestDTO objects)
-		for (SaleRequestDTO saleRequestDTO : saleRequestDTOs) {
+		for (SaleDTO.SaleRequest saleRequestDTO : saleRequestDTOs) {
 
 			Long productId = saleRequestDTO.getProductId();
 			int quantity = saleRequestDTO.getQuantity();
@@ -72,7 +72,7 @@ public class SaleService {
 			double subtotal = quantity * product.getSellingPrice();
 
 			// Create ProductListDTO to represent the product in the response
-			ProductListDTO productListDTO = ProductListDTO.builder()
+			SaleDTO.ProductList productListDTO = SaleDTO.ProductList.builder()
 				.productId(product.getId())
 				.productName(product.getProductName())
 				.quantity(quantity)
@@ -108,7 +108,7 @@ public class SaleService {
 		businessRepository.save(business);
 
 		// Create and return the SaleResponseDTO
-		SaleResponseDTO saleResponseDTO = SaleResponseDTO.builder()
+		SaleDTO.SaleResponse saleResponseDTO = SaleDTO.SaleResponse.builder()
 			.saleId(sale.getId())
 			.products(productListDTOs)
 			.transactionDate(sale.getTransactionDate())
@@ -120,13 +120,13 @@ public class SaleService {
 
 
 
-	public ResponseEntity<List<SaleResponseDTO>> getAllSales(Long businessId) {
+	public ResponseEntity<List<SaleDTO.SaleResponse>> getAllSales(Long businessId) {
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		List<Sale> sales = new ArrayList<>(selectedBusiness.getSales());
 
-		List<SaleResponseDTO> saleResponseDTOs = sales.stream()
+		List<SaleDTO.SaleResponse> saleResponseDTOs = sales.stream()
 			.map(sale -> {
-				SaleResponseDTO saleResponseDTO = new SaleResponseDTO();
+				SaleDTO.SaleResponse saleResponseDTO = new SaleDTO.SaleResponse();
 				saleResponseDTO.setSaleId(sale.getId());
 				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
 				saleResponseDTO.setTransactionDate(sale.getTransactionDate());
@@ -139,11 +139,11 @@ public class SaleService {
 	}
 
 	// Helper method to convert products to DTOs
-	private List<ProductListDTO> convertProductsToDTOs(Set<SaleProduct> saleProducts) {
+	private List<SaleDTO.ProductList> convertProductsToDTOs(Set<SaleProduct> saleProducts) {
 		return saleProducts.stream()
 			.map(saleProduct -> {
 				Product product = saleProduct.getProduct();
-				ProductListDTO productListDTO = new ProductListDTO();
+				SaleDTO.ProductList productListDTO = new SaleDTO.ProductList();
 				productListDTO.setProductId(product.getId());
 				productListDTO.setProductName(product.getProductName());
 				productListDTO.setQuantity(getQuantity(product.getId(), saleProducts)); // Assuming quantity is always 1 for fetching sales

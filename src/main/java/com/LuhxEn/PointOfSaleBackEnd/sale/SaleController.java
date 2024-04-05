@@ -14,12 +14,12 @@ public class SaleController {
 	private final SaleService saleService;
 
 	@PostMapping("/{businessId}/create")
-	public ResponseEntity<?> createSale(@PathVariable Long businessId, @RequestBody List<SaleRequestDTO> saleRequestDTOs){
+	public ResponseEntity<?> createSale(@PathVariable Long businessId, @RequestBody List<SaleDTO.SaleRequest> saleRequestDTOs){
 		return saleService.createSale(businessId, saleRequestDTOs);
 	}
 
 	@GetMapping("/{businessId}")
-	public ResponseEntity<List<SaleResponseDTO>> getAllSales(@PathVariable Long businessId) {
+	public ResponseEntity<List<SaleDTO.SaleResponse>> getAllSales(@PathVariable Long businessId) {
 		return saleService.getAllSales(businessId);
 	}
 }
