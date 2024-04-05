@@ -18,6 +18,7 @@ public class Sale {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	private Date transactionDate;
+	private double grandTotal;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "sale_id")

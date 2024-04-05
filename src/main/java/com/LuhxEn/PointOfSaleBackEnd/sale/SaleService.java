@@ -96,6 +96,8 @@ public class SaleService {
 			saleProduct.setProduct(product);
 		}
 
+		sale.setGrandTotal(grandTotal);
+
 		// Save the sale entity along with associated sale products
 		sale = saleRepository.save(sale);
 
@@ -110,7 +112,7 @@ public class SaleService {
 			.saleId(sale.getId())
 			.products(productListDTOs)
 			.transactionDate(sale.getTransactionDate())
-			.grandTotal(grandTotal)
+			.grandTotal(sale.getGrandTotal())
 			.build();
 
 		return ResponseEntity.ok(saleResponseDTO);
@@ -128,7 +130,7 @@ public class SaleService {
 				saleResponseDTO.setSaleId(sale.getId());
 				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
 				saleResponseDTO.setTransactionDate(sale.getTransactionDate());
-				saleResponseDTO.setGrandTotal(calculateTotal(sale.getSaleProduct()));
+				saleResponseDTO.setGrandTotal(sale.getGrandTotal());
 				return saleResponseDTO;
 			})
 			.collect(Collectors.toList());
@@ -150,17 +152,6 @@ public class SaleService {
 			})
 			.collect(Collectors.toList());
 	}
-
-	// Helper method to calculate total sale amount
-	private double calculateTotal(Set<SaleProduct> saleProducts) {
-		return saleProducts.stream()
-			.mapToDouble(saleProduct -> {
-				Product product = saleProduct.getProduct(); // Retrieve the product from the SaleProduct
-				return product.getSellingPrice() * saleProduct.getQuantity(); // Calculate subtotal for the saleProduct
-			})
-			.sum();
-	}
-
 
 
 	// Helper method to get the quantity of a product sold in a sale
