@@ -37,15 +37,7 @@ public class ProductService {
 //	}
 
 	public ResponseEntity<List<Product>> getProducts(Long businessId) {
-		Query query = entityManager.createNativeQuery(
-			"SELECT * FROM Product WHERE business_id = :businessId AND is_deleted = false ORDER BY product_name",
-			Product.class
-		);
-		query.setParameter("businessId", businessId);
-
-		@SuppressWarnings("unchecked")
-		List<Product> products = query.getResultList();
-
+		List<Product> products = productRepository.getProductsAsc(businessId);
 		return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 
