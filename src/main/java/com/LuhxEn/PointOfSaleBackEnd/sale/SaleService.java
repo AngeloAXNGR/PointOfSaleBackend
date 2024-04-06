@@ -229,8 +229,8 @@ public class SaleService {
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		LocalDate today = LocalDate.now();
 
-		// Construct and execute the native SQL query
-		double overall = calculateTotalSaleAmountForToday(selectedBusiness.getId(), today);
+		// Call the repository method to get total sale amount
+		double overall = saleRepository.getTotalSaleAmountForToday(selectedBusiness.getId(), today);
 
 		// Construct the response
 		SaleDTO.TodayTotalSaleAmount todayOverallSale = new SaleDTO.TodayTotalSaleAmount();
@@ -239,24 +239,7 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(todayOverallSale);
 	}
 
-	private double calculateTotalSaleAmountForToday(Long businessId, LocalDate today) {
-		// Construct the native SQL query to sum grand_total for today's sales
-		// Coalesce here is used to provide a fallback value should it return null (returns desired value or 0 by default)
-		String nativeQuery = "SELECT COALESCE(SUM(s.grand_total), 0) " +
-			"FROM Sale s " +
-			"WHERE s.business_id = :businessId " +
-			"AND DATE(s.transaction_date) = :today";
 
-		Query query = entityManager.createNativeQuery(nativeQuery);
-		query.setParameter("businessId", businessId);
-		query.setParameter("today", today);
-
-		Object result = query.getSingleResult();
-
-		// shorthand if else statement
-		// should the query return a null (despite using coalesce) we should still be able to return 0 as default value.
-		return result != null ? ((Number) result).doubleValue() : 0.0;
-	}
 
 
 }
