@@ -28,9 +28,6 @@ public class SaleController {
 //		return saleService.getSalesForToday(businessId);
 //	}
 
-	@GetMapping("/{businessId}/todayTotalSaleAmount")
-	public ResponseEntity<SaleDTO.TodayTotalSaleAmount>  getTodayTotalSaleAmount(@PathVariable Long businessId){
-		return saleService.getTodayTotalSaleAmount(businessId);
 	@GetMapping("/{businessId}/dailyTotalSaleAmount")
 	public ResponseEntity<SaleDTO.DailyTotalSaleAmount>  getDailyTotalSaleAmount(@PathVariable Long businessId){
 		return saleService.getDailyTotalSaleAmount(businessId);
