@@ -275,5 +275,27 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyTotalProductsSold);
 	}
 
+	public ResponseEntity<SaleDTO.Dashboard> getDashboardValues(Long businessId){
+		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+		LocalDate today = LocalDate.now();
+		double dailyTotalSaleAmount = saleRepository.getTotalSaleAmountForToday(selectedBusiness.getId(), today);
+		double monthlyTotalSaleAmount = saleRepository.getTotalSaleAmountForTheMonth(selectedBusiness.getId());
+		int dailyTotalProductsSold = saleRepository.getTotalProductsSoldForToday(selectedBusiness.getId(), today);
+		int monthlyTotalProductsSold = saleRepository.getTotalProductsSoldForTheMonth(selectedBusiness.getId());
+
+		SaleDTO.Dashboard dashboard = SaleDTO.Dashboard
+			.builder()
+			.dailyTotalSaleAmount(dailyTotalSaleAmount)
+			.monthlyTotalSaleAmount(monthlyTotalSaleAmount)
+			.dailyTotalProductsSold(dailyTotalProductsSold)
+			.monthlyTotalProductSold(monthlyTotalProductsSold)
+			.build();
+
+		return ResponseEntity.status(HttpStatus.OK).body(dashboard);
+	}
+
+
+
+
 }
 

@@ -74,6 +74,16 @@ public class SaleDTO {
 	}
 
 
+
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class Dashboard{
+		private double dailyTotalSaleAmount;
+		private double monthlyTotalSaleAmount;
+		private int dailyTotalProductsSold;
+		private int monthlyTotalProductSold;
 	}
 
 }

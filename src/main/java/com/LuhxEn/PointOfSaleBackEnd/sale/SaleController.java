@@ -47,5 +47,9 @@ public class SaleController {
 	public ResponseEntity<SaleDTO.MonthlyTotalProductsSold> getMonthlyTotalProductsSold(@PathVariable Long businessId){
 		return saleService.getMonthlyTotalProductsSold(businessId);
 	}
+
+	@GetMapping("/{businessId}/dashboard")
+	public ResponseEntity<SaleDTO.Dashboard> getDashboardValues(@PathVariable Long businessId){
+		return saleService.getDashboardValues(businessId);
 	}
 }
