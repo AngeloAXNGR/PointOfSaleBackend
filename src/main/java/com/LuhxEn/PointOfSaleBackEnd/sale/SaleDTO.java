@@ -45,8 +45,9 @@ public class SaleDTO {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public static class TodayTotalSaleAmount{
-		private double totalSaleAmount;
+	public static class DailyTotalSaleAmount{
+		private double dailyTotalSaleAmount;
+	}
 
 	@Data
 	@Builder
