@@ -239,6 +239,16 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(todayOverallSale);
 	}
 
+	public ResponseEntity<SaleDTO.MonthlyTotalSaleAmount> getMonthlyTotalSaleAmount(Long businessId){
+		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+
+		double overall = saleRepository.getTotalSaleAmountForTheMonth(selectedBusiness.getId());
+
+		SaleDTO.MonthlyTotalSaleAmount monthlyOverallSale = new SaleDTO.MonthlyTotalSaleAmount();
+		monthlyOverallSale.setMonthlyTotalSaleAmount(overall);
+
+		return ResponseEntity.status(HttpStatus.OK).body(monthlyOverallSale);
+	}
 
 
 

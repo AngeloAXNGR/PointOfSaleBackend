@@ -35,5 +35,10 @@ public class SaleController {
 	public ResponseEntity<SaleDTO.DailyTotalSaleAmount>  getDailyTotalSaleAmount(@PathVariable Long businessId){
 		return saleService.getDailyTotalSaleAmount(businessId);
 	}
+
+	@GetMapping("/{businessId}/monthlyTotalSaleAmount")
+	public ResponseEntity<SaleDTO.MonthlyTotalSaleAmount> getMonthlyTotalSaleAmount(@PathVariable Long businessId){
+		return saleService.getMonthlyTotalSaleAmount(businessId);
+	}
 	}
 }
