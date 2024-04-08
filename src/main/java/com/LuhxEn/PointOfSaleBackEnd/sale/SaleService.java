@@ -250,6 +250,19 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyOverallSale);
 	}
 
+	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId){
+		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+		LocalDate today = LocalDate.now();
+
+		int totalProductsSold = saleRepository.getTotalProductsSoldForToday(selectedBusiness.getId(), today);
+
+		SaleDTO.DailyTotalProductsSold dailyTotalProductsSold = new SaleDTO.DailyTotalProductsSold();
+		dailyTotalProductsSold.setDailyTotalProductsSold(totalProductsSold);
+
+		return ResponseEntity.status(HttpStatus.OK).body(dailyTotalProductsSold);
+	}
+
+
 
 
 }

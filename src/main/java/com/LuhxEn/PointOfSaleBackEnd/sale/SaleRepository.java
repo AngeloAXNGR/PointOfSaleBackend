@@ -20,4 +20,12 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 		"AND EXTRACT(MONTH FROM s.transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE) " +
 		"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE)" , nativeQuery = true)
 	double getTotalSaleAmountForTheMonth(@Param("businessId") Long businessId);
+
+	@Query(value = "SELECT COALESCE(SUM(sp.quantity),0) " +
+		"FROM sale s " +
+		"JOIN sale_products sp ON s.id = sp.sale_id " +
+		"WHERE DATE(s.transaction_date) = :today " +
+		"AND s.business_id = :businessId", nativeQuery = true
+	)
+	Integer getTotalProductsSoldForToday(@Param("businessId") Long businessId, @Param("today") LocalDate today);
 }
