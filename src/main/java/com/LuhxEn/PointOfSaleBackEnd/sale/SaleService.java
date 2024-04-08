@@ -225,7 +225,7 @@ public class SaleService {
 //		return ResponseEntity.status(HttpStatus.OK).body(todayOverallSale);
 //	}
 
-	public ResponseEntity<SaleDTO.TodayTotalSaleAmount> getTodayTotalSaleAmount(Long businessId) {
+	public ResponseEntity<SaleDTO.DailyTotalSaleAmount> getDailyTotalSaleAmount(Long businessId) {
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		LocalDate today = LocalDate.now();
 
@@ -233,8 +233,8 @@ public class SaleService {
 		double overall = saleRepository.getTotalSaleAmountForToday(selectedBusiness.getId(), today);
 
 		// Construct the response
-		SaleDTO.TodayTotalSaleAmount todayOverallSale = new SaleDTO.TodayTotalSaleAmount();
-		todayOverallSale.setTotalSaleAmount(overall);
+		SaleDTO.DailyTotalSaleAmount todayOverallSale = new SaleDTO.DailyTotalSaleAmount();
+		todayOverallSale.setDailyTotalSaleAmount(overall);
 
 		return ResponseEntity.status(HttpStatus.OK).body(todayOverallSale);
 	}
