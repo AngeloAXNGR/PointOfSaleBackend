@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -264,6 +265,15 @@ public class SaleService {
 
 
 
+	public ResponseEntity<SaleDTO.MonthlyTotalProductsSold> getMonthlyTotalProductsSold(Long businessId){
+		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+
+		int totalProductsSold = saleRepository.getTotalProductsSoldForTheMonth(selectedBusiness.getId());
+		SaleDTO.MonthlyTotalProductsSold monthlyTotalProductsSold = new SaleDTO.MonthlyTotalProductsSold();
+		monthlyTotalProductsSold.setMonthlyTotalProductsSold(totalProductsSold);
+
+		return ResponseEntity.status(HttpStatus.OK).body(monthlyTotalProductsSold);
+	}
 
 }
 

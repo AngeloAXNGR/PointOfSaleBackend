@@ -63,6 +63,16 @@ public class SaleDTO {
 	public static class DailyTotalProductsSold{
 		private int dailyTotalProductsSold;
 	}
+
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class MonthlyTotalProductsSold{
+		private int monthlyTotalProductsSold;
+	}
+
+
 	}
 
 }
