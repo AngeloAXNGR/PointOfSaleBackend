@@ -275,6 +275,37 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyTotalProductsSold);
 	}
 
+	public ResponseEntity<List<SaleDTO.MonthlyTotalSoldForTheYear>> getMonthlyTotalSoldForYear(Long businessId) {
+		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+
+		// Initialize a list to hold yearly totals
+		List<SaleDTO.MonthlyTotalSoldForTheYear> yearlyTotals = new ArrayList<>();
+
+		// Get the current year
+		LocalDate currentDate = LocalDate.now();
+		int currentYear = currentDate.getYear();
+
+		// Retrieve total products sold for each month of the current year
+		for (int month = 1; month <= 12; month++) {
+			// Retrieve total products sold for the current month
+			int totalProductsSold = saleRepository.getTotalProductsSoldForTheYear(selectedBusiness.getId(), currentYear, month);
+
+			// Create YearlyTotalProductsSold object and add it to the list
+			SaleDTO.MonthlyTotalSoldForTheYear yearlyTotalProductsSold = new SaleDTO.MonthlyTotalSoldForTheYear();
+			yearlyTotalProductsSold.setYear(currentYear);
+			yearlyTotalProductsSold.setMonth(month);
+			yearlyTotalProductsSold.setMonthlyTotalProductsSold(totalProductsSold);
+			yearlyTotals.add(yearlyTotalProductsSold);
+		}
+
+		return ResponseEntity.status(HttpStatus.OK).body(yearlyTotals);
+	}
+
+
+
+
+
+
 	public ResponseEntity<SaleDTO.Dashboard> getDashboardValues(Long businessId){
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		LocalDate today = LocalDate.now();
