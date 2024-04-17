@@ -251,6 +251,27 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyOverallSale);
 	}
 
+	public ResponseEntity<List<SaleDTO.MonthlySaleForTheYear>> getMonthlySaleForYear(Long businessId){
+		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+
+		List<SaleDTO.MonthlySaleForTheYear> yearlySales = new ArrayList<>();
+
+		LocalDate currentDate = LocalDate.now();
+		int currentYear = currentDate.getYear();
+
+		for(int month = 1; month <= 12; month++){
+			double totalSaleAmount = saleRepository.getTotalSaleAmountForTheYear(selectedBusiness.getId(), currentYear, month);
+
+			SaleDTO.MonthlySaleForTheYear yearlyTotalSaleAmount = new SaleDTO.MonthlySaleForTheYear();
+			yearlyTotalSaleAmount.setYear(currentYear);
+			yearlyTotalSaleAmount.setMonth(month);
+			yearlyTotalSaleAmount.setMonthlyTotalSaleAmount(totalSaleAmount);
+			yearlySales.add(yearlyTotalSaleAmount);
+		}
+
+		return ResponseEntity.status(HttpStatus.OK).body(yearlySales);
+	}
+
 	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId){
 		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		LocalDate today = LocalDate.now();

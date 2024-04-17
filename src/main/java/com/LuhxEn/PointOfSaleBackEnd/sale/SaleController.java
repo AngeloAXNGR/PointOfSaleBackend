@@ -38,6 +38,11 @@ public class SaleController {
 		return saleService.getMonthlyTotalSaleAmount(businessId);
 	}
 
+	@GetMapping("/{businessId}/monthlySaleForTheYear")
+	public ResponseEntity<List<SaleDTO.MonthlySaleForTheYear>> getMonthlySaleForYear(@PathVariable Long businessId){
+		return saleService.getMonthlySaleForYear(businessId);
+	}
+
 
 	@GetMapping("/{businessId}/dailyTotalProductsSold")
 	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(@PathVariable Long businessId){
@@ -49,10 +54,12 @@ public class SaleController {
 		return saleService.getMonthlyTotalProductsSold(businessId);
 	}
 
+
 	@GetMapping("/{businessId}/monthlySoldForTheYear")
 	public ResponseEntity<List<SaleDTO.MonthlyTotalSoldForTheYear>> getMonthlyTotalSoldForYear(@PathVariable Long businessId){
 		return saleService.getMonthlyTotalSoldForYear(businessId);
 	}
+
 
 	@GetMapping("/{businessId}/dashboard")
 	public ResponseEntity<SaleDTO.Dashboard> getDashboardValues(@PathVariable Long businessId){
