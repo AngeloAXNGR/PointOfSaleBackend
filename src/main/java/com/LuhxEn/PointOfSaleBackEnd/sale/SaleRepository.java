@@ -56,4 +56,16 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
 
 
+	@Query(value = "SELECT p.*, COALESCE(SUM(sp.quantity), 0) AS total_sold " +
+		"FROM Product p " +
+		"JOIN sale_products sp ON p.id = sp.product_id " +
+		"JOIN sale s ON sp.sale_id = s.id " +
+		"WHERE s.business_id = :businessId " +
+		"AND EXTRACT(MONTH FROM s.transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE) " +
+		"GROUP BY p.id " +
+		"ORDER BY total_sold DESC " +
+		"LIMIT 5", nativeQuery = true
+	)
+	List<Object[]> getMostPopularProducts(@Param("businessId") Long businessId);
+
 }

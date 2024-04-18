@@ -347,6 +347,22 @@ public class SaleService {
 	}
 
 
+	public ResponseEntity<List<SaleDTO.PopularProductDTO>> getMostPopularProducts(Long businessId) {
+		businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+
+		List<Object[]> popularProducts = saleRepository.getMostPopularProducts(businessId);
+
+		List<SaleDTO.PopularProductDTO> popularProductDTOS = new ArrayList<>();
+		for (Object[] row : popularProducts) {
+			String productName = (String) row[10];
+			Long quantitySold = (Long) row[11];
+			popularProductDTOS.add(new SaleDTO.PopularProductDTO(productName, quantitySold));
+		}
+
+		return ResponseEntity.status(HttpStatus.OK).body(popularProductDTOS);
+
+
+	}
 
 
 }

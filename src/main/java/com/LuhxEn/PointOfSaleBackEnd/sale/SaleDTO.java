@@ -106,4 +106,14 @@ public class SaleDTO {
 		private int monthlyTotalProductSold;
 	}
 
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class PopularProductDTO{
+		private String productName;
+		private Long quantitySold;
+
+	}
+
 }

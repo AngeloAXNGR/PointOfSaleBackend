@@ -65,4 +65,9 @@ public class SaleController {
 	public ResponseEntity<SaleDTO.Dashboard> getDashboardValues(@PathVariable Long businessId){
 		return saleService.getDashboardValues(businessId);
 	}
+
+	@GetMapping("/{businessId}/popularProducts")
+	public ResponseEntity<List<SaleDTO.PopularProductDTO>> getMostPopularProducts(@PathVariable Long businessId){
+		return saleService.getMostPopularProducts(businessId);
+	}
 }
