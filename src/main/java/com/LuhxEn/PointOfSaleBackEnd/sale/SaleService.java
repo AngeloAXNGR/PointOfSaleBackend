@@ -128,23 +128,28 @@ public class SaleService {
 	}
 
 
-
 	public ResponseEntity<List<SaleDTO.SaleResponse>> getAllSales(Long businessId) {
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
-		List<Sale> sales = new ArrayList<>(selectedBusiness.getSales());
+		try {
+			Business selectedBusiness = businessRepository.getReferenceById(businessId);
 
-		List<SaleDTO.SaleResponse> saleResponseDTOs = sales.stream()
-			.map(sale -> {
-				SaleDTO.SaleResponse saleResponseDTO = new SaleDTO.SaleResponse();
-				saleResponseDTO.setSaleId(sale.getId());
-				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
-				saleResponseDTO.setTransactionDate(sale.getTransactionDate());
-				saleResponseDTO.setGrandTotal(sale.getGrandTotal());
-				return saleResponseDTO;
-			})
-			.collect(Collectors.toList());
+			List<Sale> sales = new ArrayList<>(selectedBusiness.getSales());
 
-		return ResponseEntity.ok(saleResponseDTOs);
+			List<SaleDTO.SaleResponse> saleResponseDTOs = sales.stream()
+				.map(sale -> {
+					SaleDTO.SaleResponse saleResponseDTO = new SaleDTO.SaleResponse();
+					saleResponseDTO.setSaleId(sale.getId());
+					saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
+					saleResponseDTO.setTransactionDate(sale.getTransactionDate());
+					saleResponseDTO.setGrandTotal(sale.getGrandTotal());
+					return saleResponseDTO;
+				})
+				.collect(Collectors.toList());
+
+			return ResponseEntity.ok(saleResponseDTOs);
+		} catch (Exception e) {
+			throw new BusinessNotFoundException("Business Not Found.");
+		}
+
 	}
 
 	// Helper method to convert products to DTOs
@@ -227,7 +232,8 @@ public class SaleService {
 //	}
 
 	public ResponseEntity<SaleDTO.DailyTotalSaleAmount> getDailyTotalSaleAmount(Long businessId) {
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+
 		LocalDate today = LocalDate.now();
 
 		// Call the repository method to get total sale amount
@@ -240,8 +246,8 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(todayOverallSale);
 	}
 
-	public ResponseEntity<SaleDTO.MonthlyTotalSaleAmount> getMonthlyTotalSaleAmount(Long businessId){
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+	public ResponseEntity<SaleDTO.MonthlyTotalSaleAmount> getMonthlyTotalSaleAmount(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
 		double overall = saleRepository.getTotalSaleAmountForTheMonth(selectedBusiness.getId());
 
@@ -251,15 +257,15 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyOverallSale);
 	}
 
-	public ResponseEntity<List<SaleDTO.MonthlySaleForTheYear>> getMonthlySaleForYear(Long businessId){
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+	public ResponseEntity<List<SaleDTO.MonthlySaleForTheYear>> getMonthlySaleForYear(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
 		List<SaleDTO.MonthlySaleForTheYear> yearlySales = new ArrayList<>();
 
 		LocalDate currentDate = LocalDate.now();
 		int currentYear = currentDate.getYear();
 
-		for(int month = 1; month <= 12; month++){
+		for (int month = 1; month <= 12; month++) {
 			double totalSaleAmount = saleRepository.getTotalSaleAmountForTheYear(selectedBusiness.getId(), currentYear, month);
 
 			SaleDTO.MonthlySaleForTheYear yearlyTotalSaleAmount = new SaleDTO.MonthlySaleForTheYear();
@@ -272,8 +278,9 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(yearlySales);
 	}
 
-	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId){
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+
 		LocalDate today = LocalDate.now();
 
 		int totalProductsSold = saleRepository.getTotalProductsSoldForToday(selectedBusiness.getId(), today);
@@ -285,9 +292,8 @@ public class SaleService {
 	}
 
 
-
-	public ResponseEntity<SaleDTO.MonthlyTotalProductsSold> getMonthlyTotalProductsSold(Long businessId){
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+	public ResponseEntity<SaleDTO.MonthlyTotalProductsSold> getMonthlyTotalProductsSold(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
 		int totalProductsSold = saleRepository.getTotalProductsSoldForTheMonth(selectedBusiness.getId());
 		SaleDTO.MonthlyTotalProductsSold monthlyTotalProductsSold = new SaleDTO.MonthlyTotalProductsSold();
@@ -297,7 +303,7 @@ public class SaleService {
 	}
 
 	public ResponseEntity<List<SaleDTO.MonthlyTotalSoldForTheYear>> getMonthlyTotalSoldForYear(Long businessId) {
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
 		// Initialize a list to hold yearly totals
 		List<SaleDTO.MonthlyTotalSoldForTheYear> yearlyTotals = new ArrayList<>();
@@ -323,13 +329,11 @@ public class SaleService {
 	}
 
 
+	public ResponseEntity<SaleDTO.Dashboard> getDashboardValues(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
-
-
-
-	public ResponseEntity<SaleDTO.Dashboard> getDashboardValues(Long businessId){
-		Business selectedBusiness = businessRepository.getReferenceById(businessId);
 		LocalDate today = LocalDate.now();
+
 		double dailyTotalSaleAmount = saleRepository.getTotalSaleAmountForToday(selectedBusiness.getId(), today);
 		double monthlyTotalSaleAmount = saleRepository.getTotalSaleAmountForTheMonth(selectedBusiness.getId());
 		int dailyTotalProductsSold = saleRepository.getTotalProductsSoldForToday(selectedBusiness.getId(), today);
