@@ -69,4 +69,14 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 	)
 	List<Object[]> getMostPopularProducts(@Param("businessId") Long businessId);
 
+	@Query(value = "SELECT SUM(sp.quantity * p.selling_price) AS sale, " +
+		"SUM(sp.quantity * p.selling_price) - SUM(sp.quantity * p.purchase_price) AS profit " +
+		"FROM sale s JOIN sale_products sp ON s.id = sp.sale_id " +
+		"JOIN product p on sp.product_id = p.id " +
+		"WHERE s.business_id = :businessId " +
+		"AND EXTRACT(MONTH FROM s.transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE)"
+	, nativeQuery = true)
+	Object getProfitReport(@Param("businessId") Long businessId);
+
+
 }

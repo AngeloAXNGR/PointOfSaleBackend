@@ -368,6 +368,17 @@ public class SaleService {
 
 	}
 
+	public ResponseEntity<SaleDTO.ProfitReport> getProfitReport(Long businessId){
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+		Object[] profitReportValues = (Object[]) saleRepository.getProfitReport(selectedBusiness.getId());
+
+
+		SaleDTO.ProfitReport profitReport = new SaleDTO.ProfitReport((double) profitReportValues[0], (double) profitReportValues[1]);
+
+		return ResponseEntity.status(HttpStatus.OK).body(profitReport);
+
+	}
+
 
 }
 

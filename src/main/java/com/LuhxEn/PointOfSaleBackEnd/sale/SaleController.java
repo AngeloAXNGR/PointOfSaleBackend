@@ -70,4 +70,9 @@ public class SaleController {
 	public ResponseEntity<List<SaleDTO.PopularProductDTO>> getMostPopularProducts(@PathVariable Long businessId){
 		return saleService.getMostPopularProducts(businessId);
 	}
+
+	@GetMapping("/{businessId}/profitReport")
+	public ResponseEntity<SaleDTO.ProfitReport> getProfitReport(@PathVariable Long businessId){
+		return saleService.getProfitReport(businessId);
+	}
 }

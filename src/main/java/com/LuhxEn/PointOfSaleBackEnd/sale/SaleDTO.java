@@ -116,4 +116,13 @@ public class SaleDTO {
 
 	}
 
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class ProfitReport{
+		private double revenue;
+		private double profit;
+	}
+
 }
