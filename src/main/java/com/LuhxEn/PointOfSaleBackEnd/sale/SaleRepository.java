@@ -36,7 +36,7 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 		"WHERE DATE(s.transaction_date) = :today " +
 		"AND s.business_id = :businessId", nativeQuery = true
 	)
-	Integer getTotalProductsSoldForToday(@Param("businessId") Long businessId, @Param("today") LocalDate today);
+	Integer getDailyTotalProductsSold(@Param("businessId") Long businessId, @Param("today") LocalDate today);
 
 	@Query(value = "SELECT COALESCE(SUM(sp.quantity), 0) " +
 		"FROM sale s " +
@@ -44,7 +44,7 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 		"WHERE EXTRACT(MONTH FROM s.transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE) " +
 		"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE) " +
 		"AND s.business_id = :businessId", nativeQuery = true)
-	Integer getTotalProductsSoldForTheMonth(@Param("businessId") Long businessId);
+	Integer getMonthlyTotalProductsSold(@Param("businessId") Long businessId);
 
 
 	@Query(value = "SELECT COALESCE(SUM(sp.quantity), 0) " +
@@ -53,7 +53,7 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 		"WHERE EXTRACT(MONTH FROM s.transaction_date) = :month " +
 		"AND EXTRACT(YEAR FROM s.transaction_date) = :year " +
 		"AND s.business_id = :businessId", nativeQuery = true)
-	Integer getTotalProductsSoldForTheYear(@Param("businessId") Long businessId, @Param("year") int year, @Param("month") int month);
+	Integer getMonthlySoldForTheYear(@Param("businessId") Long businessId, @Param("year") int year, @Param("month") int month);
 
 
 	@Query(value = "SELECT p.*, COALESCE(SUM(sp.quantity), 0) AS total_sold " +

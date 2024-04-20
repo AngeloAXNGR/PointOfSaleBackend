@@ -291,10 +291,12 @@ public class SaleService {
 
 		LocalDate today = LocalDate.now();
 
-		int totalProductsSold = saleRepository.getTotalProductsSoldForToday(selectedBusiness.getId(), today);
+		int totalProductsSold = saleRepository.getDailyTotalProductsSold(selectedBusiness.getId(), today);
 
-		SaleDTO.DailyTotalProductsSold dailyTotalProductsSold = new SaleDTO.DailyTotalProductsSold();
-		dailyTotalProductsSold.setDailyTotalProductsSold(totalProductsSold);
+		SaleDTO.DailyTotalProductsSold dailyTotalProductsSold = SaleDTO.DailyTotalProductsSold
+			.builder()
+			.dailyTotalProductsSold(totalProductsSold)
+			.build();
 
 		return ResponseEntity.status(HttpStatus.OK).body(dailyTotalProductsSold);
 	}
@@ -303,14 +305,16 @@ public class SaleService {
 	public ResponseEntity<SaleDTO.MonthlyTotalProductsSold> getMonthlyTotalProductsSold(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
-		int totalProductsSold = saleRepository.getTotalProductsSoldForTheMonth(selectedBusiness.getId());
-		SaleDTO.MonthlyTotalProductsSold monthlyTotalProductsSold = new SaleDTO.MonthlyTotalProductsSold();
-		monthlyTotalProductsSold.setMonthlyTotalProductsSold(totalProductsSold);
+		int totalProductsSold = saleRepository.getMonthlyTotalProductsSold(selectedBusiness.getId());
+		SaleDTO.MonthlyTotalProductsSold monthlyTotalProductsSold = SaleDTO.MonthlyTotalProductsSold
+			.builder()
+			.monthlyTotalProductsSold(totalProductsSold)
+			.build();
 
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyTotalProductsSold);
 	}
 
-	public ResponseEntity<List<SaleDTO.MonthlyTotalSoldForTheYear>> getMonthlyTotalSoldForYear(Long businessId) {
+	public ResponseEntity<List<SaleDTO.MonthlyTotalSoldForTheYear>> getMonthlySoldForTheYear(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
 		// Initialize a list to hold yearly totals
@@ -323,13 +327,15 @@ public class SaleService {
 		// Retrieve total products sold for each month of the current year
 		for (int month = 1; month <= 12; month++) {
 			// Retrieve total products sold for the current month
-			int totalProductsSold = saleRepository.getTotalProductsSoldForTheYear(selectedBusiness.getId(), currentYear, month);
+			int totalProductsSold = saleRepository.getMonthlySoldForTheYear(selectedBusiness.getId(), currentYear, month);
 
 			// Create YearlyTotalProductsSold object and add it to the list
-			SaleDTO.MonthlyTotalSoldForTheYear yearlyTotalProductsSold = new SaleDTO.MonthlyTotalSoldForTheYear();
-			yearlyTotalProductsSold.setYear(currentYear);
-			yearlyTotalProductsSold.setMonth(month);
-			yearlyTotalProductsSold.setMonthlyTotalProductsSold(totalProductsSold);
+			SaleDTO.MonthlyTotalSoldForTheYear yearlyTotalProductsSold = SaleDTO.MonthlyTotalSoldForTheYear
+				.builder()
+				.year(currentYear)
+				.month(month)
+				.monthlyTotalProductsSold(totalProductsSold)
+				.build();
 			yearlyTotals.add(yearlyTotalProductsSold);
 		}
 
@@ -344,8 +350,8 @@ public class SaleService {
 
 		double dailyTotalRevenue = saleRepository.getDailyTotalRevenue(selectedBusiness.getId(), today);
 		double monthlyTotalRevenue = saleRepository.getMonthlyTotalRevenue(selectedBusiness.getId());
-		int dailyTotalProductsSold = saleRepository.getTotalProductsSoldForToday(selectedBusiness.getId(), today);
-		int monthlyTotalProductsSold = saleRepository.getTotalProductsSoldForTheMonth(selectedBusiness.getId());
+		int dailyTotalProductsSold = saleRepository.getDailyTotalProductsSold(selectedBusiness.getId(), today);
+		int monthlyTotalProductsSold = saleRepository.getMonthlyTotalProductsSold(selectedBusiness.getId());
 
 		SaleDTO.Dashboard dashboard = SaleDTO.Dashboard
 			.builder()

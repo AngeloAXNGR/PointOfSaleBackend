@@ -56,8 +56,8 @@ public class SaleController {
 
 
 	@GetMapping("/{businessId}/monthlySoldForTheYear")
-	public ResponseEntity<List<SaleDTO.MonthlyTotalSoldForTheYear>> getMonthlyTotalSoldForYear(@PathVariable Long businessId){
-		return saleService.getMonthlyTotalSoldForYear(businessId);
+	public ResponseEntity<List<SaleDTO.MonthlyTotalSoldForTheYear>> getMonthlySoldForTheYear(@PathVariable Long businessId){
+		return saleService.getMonthlySoldForTheYear(businessId);
 	}
 
 
