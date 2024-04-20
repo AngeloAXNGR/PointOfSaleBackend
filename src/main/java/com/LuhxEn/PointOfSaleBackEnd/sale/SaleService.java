@@ -174,8 +174,8 @@ public class SaleService {
 				SaleDTO.ProductList productListDTO = new SaleDTO.ProductList();
 				productListDTO.setProductId(product.getId());
 				productListDTO.setProductName(product.getProductName());
-				productListDTO.setQuantity(getQuantity(product.getId(), saleProducts)); // Assuming quantity is always 1 for fetching sales
-				productListDTO.setSubtotal(product.getSellingPrice() * productListDTO.getQuantity()); // Assuming no quantity-based calculation here
+				productListDTO.setQuantity(getQuantity(product.getId(), saleProducts));
+				productListDTO.setSubtotal(saleProduct.getSubtotal());
 				return productListDTO;
 			})
 			.collect(Collectors.toList());

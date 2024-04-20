@@ -25,4 +25,6 @@ public class SaleProduct {
 
 	private int quantity;
 
+	private double subtotal;
+
 }
