@@ -28,19 +28,19 @@ public class SaleController {
 //		return saleService.getSalesForToday(businessId);
 //	}
 
-	@GetMapping("/{businessId}/dailyTotalSaleAmount")
-	public ResponseEntity<SaleDTO.DailyTotalSaleAmount>  getDailyTotalSaleAmount(@PathVariable Long businessId){
-		return saleService.getDailyTotalSaleAmount(businessId);
+	@GetMapping("/{businessId}/dailyTotalRevenue")
+	public ResponseEntity<SaleDTO.DailyTotalRevenue>  getDailyTotalRevenue(@PathVariable Long businessId){
+		return saleService.getDailyTotalRevenue(businessId);
 	}
 
-	@GetMapping("/{businessId}/monthlyTotalSaleAmount")
-	public ResponseEntity<SaleDTO.MonthlyTotalSaleAmount> getMonthlyTotalSaleAmount(@PathVariable Long businessId){
-		return saleService.getMonthlyTotalSaleAmount(businessId);
+	@GetMapping("/{businessId}/monthlyTotalRevenue")
+	public ResponseEntity<SaleDTO.MonthlyTotalRevenue> getMonthlyTotalRevenue(@PathVariable Long businessId){
+		return saleService.getMonthlyTotalRevenue(businessId);
 	}
 
-	@GetMapping("/{businessId}/monthlySaleForTheYear")
-	public ResponseEntity<List<SaleDTO.MonthlySaleForTheYear>> getMonthlySaleForYear(@PathVariable Long businessId){
-		return saleService.getMonthlySaleForYear(businessId);
+	@GetMapping("/{businessId}/monthlyRevenuesForTheYear")
+	public ResponseEntity<List<SaleDTO.MonthlyRevenuesForTheYear>> getMonthlyRevenuesForTheYear(@PathVariable Long businessId){
+		return saleService.getMonthlyRevenuesForTheYear(businessId);
 	}
 
 

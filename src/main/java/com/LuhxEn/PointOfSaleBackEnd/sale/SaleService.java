@@ -36,7 +36,8 @@ public class SaleService {
 	private final EntityManager entityManager;
 
 
-	@Transactional // Should some db query operations fail, the process of creating a sale would fail altogether to ensure ACID compliance
+	@Transactional
+	// Should some db query operations fail, the process of creating a sale would fail altogether to ensure ACID compliance
 	public ResponseEntity<?> createSale(Long businessId, List<SaleDTO.SaleRequest> saleRequestDTOs) {
 		if (saleRequestDTOs.isEmpty()) {
 			// Return a response indicating that the request is invalid
@@ -231,51 +232,58 @@ public class SaleService {
 //		return ResponseEntity.status(HttpStatus.OK).body(todayOverallSale);
 //	}
 
-	public ResponseEntity<SaleDTO.DailyTotalSaleAmount> getDailyTotalSaleAmount(Long businessId) {
+	public ResponseEntity<SaleDTO.DailyTotalRevenue> getDailyTotalRevenue(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
 		LocalDate today = LocalDate.now();
 
 		// Call the repository method to get total sale amount
-		double overall = saleRepository.getTotalSaleAmountForToday(selectedBusiness.getId(), today);
+		double overall = saleRepository.getDailyTotalRevenue(selectedBusiness.getId(), today);
 
 		// Construct the response
-		SaleDTO.DailyTotalSaleAmount todayOverallSale = new SaleDTO.DailyTotalSaleAmount();
-		todayOverallSale.setDailyTotalSaleAmount(overall);
+		SaleDTO.DailyTotalRevenue dailyTotalRevenue = SaleDTO.DailyTotalRevenue
+			.builder()
+			.dailyTotalRevenue(overall)
+			.build();
 
-		return ResponseEntity.status(HttpStatus.OK).body(todayOverallSale);
+		return ResponseEntity.status(HttpStatus.OK).body(dailyTotalRevenue);
 	}
 
-	public ResponseEntity<SaleDTO.MonthlyTotalSaleAmount> getMonthlyTotalSaleAmount(Long businessId) {
+	public ResponseEntity<SaleDTO.MonthlyTotalRevenue> getMonthlyTotalRevenue(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
-		double overall = saleRepository.getTotalSaleAmountForTheMonth(selectedBusiness.getId());
+		double overall = saleRepository.getMonthlyTotalRevenue(selectedBusiness.getId());
 
-		SaleDTO.MonthlyTotalSaleAmount monthlyOverallSale = new SaleDTO.MonthlyTotalSaleAmount();
-		monthlyOverallSale.setMonthlyTotalSaleAmount(overall);
+		SaleDTO.MonthlyTotalRevenue monthlyTotalRevenue = SaleDTO.MonthlyTotalRevenue
+			.builder()
+			.monthlyTotalRevenue(overall)
+			.build();
 
-		return ResponseEntity.status(HttpStatus.OK).body(monthlyOverallSale);
+
+		return ResponseEntity.status(HttpStatus.OK).body(monthlyTotalRevenue);
 	}
 
-	public ResponseEntity<List<SaleDTO.MonthlySaleForTheYear>> getMonthlySaleForYear(Long businessId) {
+	public ResponseEntity<List<SaleDTO.MonthlyRevenuesForTheYear>> getMonthlyRevenuesForTheYear(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
-		List<SaleDTO.MonthlySaleForTheYear> yearlySales = new ArrayList<>();
+		List<SaleDTO.MonthlyRevenuesForTheYear> monthlyRevenues = new ArrayList<>();
 
 		LocalDate currentDate = LocalDate.now();
 		int currentYear = currentDate.getYear();
 
 		for (int month = 1; month <= 12; month++) {
-			double totalSaleAmount = saleRepository.getTotalSaleAmountForTheYear(selectedBusiness.getId(), currentYear, month);
+			double totalRevenue = saleRepository.getMonthlyRevenuesForTheYear(selectedBusiness.getId(), currentYear, month);
 
-			SaleDTO.MonthlySaleForTheYear yearlyTotalSaleAmount = new SaleDTO.MonthlySaleForTheYear();
-			yearlyTotalSaleAmount.setYear(currentYear);
-			yearlyTotalSaleAmount.setMonth(month);
-			yearlyTotalSaleAmount.setMonthlyTotalSaleAmount(totalSaleAmount);
-			yearlySales.add(yearlyTotalSaleAmount);
+			SaleDTO.MonthlyRevenuesForTheYear revenues = SaleDTO.MonthlyRevenuesForTheYear
+				.builder()
+				.year(currentYear)
+				.month(month)
+				.monthlyRevenuesForTheYear(totalRevenue)
+				.build();
+			monthlyRevenues.add(revenues);
 		}
 
-		return ResponseEntity.status(HttpStatus.OK).body(yearlySales);
+		return ResponseEntity.status(HttpStatus.OK).body(monthlyRevenues);
 	}
 
 	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId) {
@@ -334,15 +342,15 @@ public class SaleService {
 
 		LocalDate today = LocalDate.now();
 
-		double dailyTotalSaleAmount = saleRepository.getTotalSaleAmountForToday(selectedBusiness.getId(), today);
-		double monthlyTotalSaleAmount = saleRepository.getTotalSaleAmountForTheMonth(selectedBusiness.getId());
+		double dailyTotalRevenue = saleRepository.getDailyTotalRevenue(selectedBusiness.getId(), today);
+		double monthlyTotalRevenue = saleRepository.getMonthlyTotalRevenue(selectedBusiness.getId());
 		int dailyTotalProductsSold = saleRepository.getTotalProductsSoldForToday(selectedBusiness.getId(), today);
 		int monthlyTotalProductsSold = saleRepository.getTotalProductsSoldForTheMonth(selectedBusiness.getId());
 
 		SaleDTO.Dashboard dashboard = SaleDTO.Dashboard
 			.builder()
-			.dailyTotalSaleAmount(dailyTotalSaleAmount)
-			.monthlyTotalSaleAmount(monthlyTotalSaleAmount)
+			.dailyTotalRevenue(dailyTotalRevenue)
+			.monthlyTotalRevenue(monthlyTotalRevenue)
 			.dailyTotalProductsSold(dailyTotalProductsSold)
 			.monthlyTotalProductSold(monthlyTotalProductsSold)
 			.build();
@@ -368,13 +376,11 @@ public class SaleService {
 
 	}
 
-	public ResponseEntity<SaleDTO.Profit> getMonthlyProfit(Long businessId){
+	public ResponseEntity<SaleDTO.Profit> getMonthlyProfit(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 		Double profitValue = saleRepository.getMonthlyProfit(selectedBusiness.getId());
 		SaleDTO.Profit profit = new SaleDTO.Profit(profitValue);
-
 		return ResponseEntity.status(HttpStatus.OK).body(profit);
-
 	}
 
 

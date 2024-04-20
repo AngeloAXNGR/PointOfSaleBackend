@@ -45,24 +45,24 @@ public class SaleDTO {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public static class DailyTotalSaleAmount{
-		private double dailyTotalSaleAmount;
+	public static class DailyTotalRevenue{
+		private double dailyTotalRevenue;
 	}
 
 	@Data
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public static class MonthlyTotalSaleAmount{
-		private double monthlyTotalSaleAmount;
+	public static class MonthlyTotalRevenue{
+		private double monthlyTotalRevenue;
 	}
 
 	@Data
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public static class MonthlySaleForTheYear{
-		private double monthlyTotalSaleAmount;
+	public static class MonthlyRevenuesForTheYear{
+		private double monthlyRevenuesForTheYear;
 		private int month;
 		private int year;
 	}
@@ -100,8 +100,8 @@ public class SaleDTO {
 	@AllArgsConstructor
 	@NoArgsConstructor
 	public static class Dashboard{
-		private double dailyTotalSaleAmount;
-		private double monthlyTotalSaleAmount;
+		private double dailyTotalRevenue;
+		private double monthlyTotalRevenue;
 		private int dailyTotalProductsSold;
 		private int monthlyTotalProductSold;
 	}
