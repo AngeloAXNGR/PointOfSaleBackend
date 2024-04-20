@@ -54,6 +54,10 @@ public class SaleService {
 		// Initial Sale GrandTotal (To be recomputed later)
 		double grandTotal = 0;
 
+		double costOfGoodsSold = 0;
+
+		double profit = 0;
+
 		// Set transaction date to the current date and time
 		sale.setTransactionDate(new Date());
 
@@ -81,6 +85,9 @@ public class SaleService {
 			// Calculate subtotal for the product
 			double subtotal = quantity * product.getSellingPrice();
 
+			// Cost of Goods Sold Subtotal
+			double cogsSubtotal = quantity * product.getPurchasePrice();
+
 			// Create ProductListDTO to represent the product in the response
 			SaleDTO.ProductList productListDTO = SaleDTO.ProductList.builder()
 				.productId(product.getId())
@@ -95,10 +102,14 @@ public class SaleService {
 			// Increment total grand total
 			grandTotal += subtotal;
 
+			// Increment total cost of goods sold
+			costOfGoodsSold += cogsSubtotal;
+
 			// Create SaleProduct entity to represent the association between sale and product
 			SaleProduct saleProduct = new SaleProduct();
 			saleProduct.setQuantity(quantity);
 
+			saleProduct.setSubtotal(subtotal);
 			// Reference of sale to saleProduct
 			sale.getSaleProduct().add(saleProduct);
 
@@ -107,6 +118,8 @@ public class SaleService {
 		}
 
 		sale.setGrandTotal(grandTotal);
+
+		sale.setProfit(grandTotal - costOfGoodsSold);
 
 		// Save the sale entity along with associated sale products
 		sale = saleRepository.save(sale);
