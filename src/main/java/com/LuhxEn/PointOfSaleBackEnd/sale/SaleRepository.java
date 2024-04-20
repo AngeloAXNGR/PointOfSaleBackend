@@ -19,7 +19,7 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 		"FROM Sale s " +
 		"WHERE s.business_id = :businessId " +
 		"AND EXTRACT(MONTH FROM s.transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE) " +
-		"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE)" , nativeQuery = true)
+		"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE)", nativeQuery = true)
 	double getTotalSaleAmountForTheMonth(@Param("businessId") Long businessId);
 
 	@Query(value = "SELECT COALESCE(SUM(s.grand_total),0) " +
@@ -56,7 +56,6 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 	Integer getTotalProductsSoldForTheYear(@Param("businessId") Long businessId, @Param("year") int year, @Param("month") int month);
 
 
-
 	@Query(value = "SELECT p.*, COALESCE(SUM(sp.quantity), 0) AS total_sold " +
 		"FROM Product p " +
 		"JOIN sale_products sp ON p.id = sp.product_id " +
@@ -69,14 +68,21 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 	)
 	List<Object[]> getMostPopularProducts(@Param("businessId") Long businessId);
 
-	@Query(value = "SELECT SUM(sp.quantity * p.selling_price) AS sale, " +
-		"SUM(sp.quantity * p.selling_price) - SUM(sp.quantity * p.purchase_price) AS profit " +
+	//	@Query(value = "SELECT SUM(sp.quantity * p.selling_price) AS sale, " +
+//		"SUM(sp.quantity * p.selling_price) - SUM(sp.quantity * p.purchase_price) AS profit " +
+//		"FROM sale s JOIN sale_products sp ON s.id = sp.sale_id " +
+//		"JOIN product p on sp.product_id = p.id " +
+//		"WHERE s.business_id = :businessId " +
+//		"AND EXTRACT(MONTH FROM s.transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE)"
+//	, nativeQuery = true)
+	@Query(value =
+		"SELECT SUM(sp.quantity * p.selling_price) - SUM(sp.quantity * p.purchase_price) AS profit " +
 		"FROM sale s JOIN sale_products sp ON s.id = sp.sale_id " +
 		"JOIN product p on sp.product_id = p.id " +
 		"WHERE s.business_id = :businessId " +
 		"AND EXTRACT(MONTH FROM s.transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE)"
-	, nativeQuery = true)
-	Object getProfitReport(@Param("businessId") Long businessId);
+		, nativeQuery = true)
+	Double getMonthlyProfit(@Param("businessId") Long businessId);
 
 
 }

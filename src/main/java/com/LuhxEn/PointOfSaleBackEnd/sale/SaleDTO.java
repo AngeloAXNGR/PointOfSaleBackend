@@ -120,8 +120,7 @@ public class SaleDTO {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public static class ProfitReport{
-		private double revenue;
+	public static class Profit{
 		private double profit;
 	}
 
