@@ -1,5 +1,7 @@
 package com.LuhxEn.PointOfSaleBackEnd.sale;
 
+import com.LuhxEn.PointOfSaleBackEnd.batch.Batch;
+import com.LuhxEn.PointOfSaleBackEnd.batch.BatchRepository;
 import com.LuhxEn.PointOfSaleBackEnd.business.Business;
 import com.LuhxEn.PointOfSaleBackEnd.business.BusinessRepository;
 import com.LuhxEn.PointOfSaleBackEnd.exception.BusinessNotFoundException;
@@ -9,7 +11,6 @@ import com.LuhxEn.PointOfSaleBackEnd.product.Product;
 import com.LuhxEn.PointOfSaleBackEnd.product.ProductRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,12 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +27,7 @@ public class SaleService {
 	private final SaleRepository saleRepository;
 	private final BusinessRepository businessRepository;
 	private final ProductRepository productRepository;
+	private final BatchRepository batchRepository;
 
 	@PersistenceContext
 	private final EntityManager entityManager;
@@ -64,35 +61,62 @@ public class SaleService {
 		// Create an empty arraylist of type ProductListDTO
 		List<SaleDTO.ProductList> productListDTOs = new ArrayList<>();
 
+
+
 		// Loop through the request body (list of SaleRequestDTO objects)
 		for (SaleDTO.SaleRequest saleRequestDTO : saleRequestDTOs) {
-
 			Long productId = saleRequestDTO.getProductId();
-			int quantity = saleRequestDTO.getQuantity();
+			int totalQuantity = saleRequestDTO.getQuantity();
+			int totalQuantityCopy = totalQuantity;
+
 
 			// Retrieve product from database
 			Product product = productRepository.findById(productId)
 				.orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-			// Update stock of the product and check for sufficient stock
-			int newStock = product.getStock() - quantity;
-			if (newStock < 0) {
-				throw new InsufficientStockException("Product does not have enough stock");
+			//TODO: Update stock of the product and check for sufficient stock
+			List<Batch> batches = batchRepository.getNonExpiredBatch(productId);
+			List<Batch> batchesToUpdate = new ArrayList<>();
+			int batchTotalQuantity = batches.stream().mapToInt(Batch::getStock).sum();
+			System.out.println("Batch Total Quantity: " + batchTotalQuantity);
+
+
+			if(totalQuantity <= batchTotalQuantity){
+				for(Batch batch : batches){
+					if(totalQuantity > 0){
+						int quantityToDeduct = Math.min(totalQuantity, batch.getStock());
+
+						batch.setStock(batch.getStock() - quantityToDeduct);
+
+						batchesToUpdate.add(batch);
+
+						totalQuantity -= quantityToDeduct;
+					}else{
+						break;
+					}
+				}
+
+				batchRepository.saveAll(batchesToUpdate);
+			}else{
+				throw new InsufficientStockException("Product does not have enough stocks");
 			}
 
-			product.setStock(newStock);
+
+			int newStock = product.getTotalStock() - totalQuantityCopy;
+
+			product.setTotalStock(newStock);
 
 			// Calculate subtotal for the product
-			double subtotal = quantity * product.getSellingPrice();
+			double subtotal = totalQuantityCopy * product.getSellingPrice();
 
 			// Cost of Goods Sold Subtotal
-			double cogsSubtotal = quantity * product.getPurchasePrice();
+			double cogsSubtotal = totalQuantityCopy * product.getPurchasePrice();
 
 			// Create ProductListDTO to represent the product in the response
 			SaleDTO.ProductList productListDTO = SaleDTO.ProductList.builder()
 				.productId(product.getId())
 				.productName(product.getProductName())
-				.quantity(quantity)
+				.quantity(totalQuantityCopy)
 				.subtotal(subtotal)
 				.build();
 
@@ -107,7 +131,7 @@ public class SaleService {
 
 			// Create SaleProduct entity to represent the association between sale and product
 			SaleProduct saleProduct = new SaleProduct();
-			saleProduct.setQuantity(quantity);
+			saleProduct.setQuantity(totalQuantityCopy);
 
 			saleProduct.setSubtotal(subtotal);
 			// Reference of sale to saleProduct
@@ -378,6 +402,23 @@ public class SaleService {
 	}
 
 
+	//TODO: BUGFIX
+//	public ResponseEntity<List<SaleDTO.PopularProductDTO>> getMostPopularProducts(Long businessId) {
+//		businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+//
+//		List<Object[]> popularProducts = saleRepository.getMostPopularProducts(businessId);
+//		System.out.println("POPULAR PRODUCTS: " + popularProducts);
+//
+//		List<SaleDTO.PopularProductDTO> popularProductDTOS = new ArrayList<>();
+//		for (Object[] row : popularProducts) {
+//			String productName = (String) row[9];
+//			Long quantitySold = (Long) row[10];
+//			popularProductDTOS.add(new SaleDTO.PopularProductDTO(productName, quantitySold));
+//		}
+//
+//		return ResponseEntity.status(HttpStatus.OK).body(popularProductDTOS);
+//	}
+
 	public ResponseEntity<List<SaleDTO.PopularProductDTO>> getMostPopularProducts(Long businessId) {
 		businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
@@ -385,14 +426,12 @@ public class SaleService {
 
 		List<SaleDTO.PopularProductDTO> popularProductDTOS = new ArrayList<>();
 		for (Object[] row : popularProducts) {
-			String productName = (String) row[10];
-			Long quantitySold = (Long) row[11];
+			String productName = (String) row[8];
+			Long quantitySold = (Long) row[9];
 			popularProductDTOS.add(new SaleDTO.PopularProductDTO(productName, quantitySold));
 		}
 
 		return ResponseEntity.status(HttpStatus.OK).body(popularProductDTOS);
-
-
 	}
 
 	public ResponseEntity<SaleDTO.Profit> getMonthlyProfit(Long businessId) {
