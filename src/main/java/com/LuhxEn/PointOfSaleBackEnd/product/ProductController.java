@@ -23,14 +23,14 @@ public class ProductController {
 	}
 
 	@PostMapping("/{businessId}/create")
-	public ResponseEntity<Product> addProduct(@PathVariable Long businessId, @RequestBody Product product){
-		return productService.addProduct(businessId, product);
+	public ResponseEntity<?> addProducts(@PathVariable Long businessId, @RequestBody List<ProductDTO.ProductRequest> products){
+		return productService.addProducts(businessId, products);
 	}
 
-	@PutMapping("/update/{id}")
-	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
-		return productService.updateProduct(id,product);
-	}
+//	@PutMapping("/update/{id}")
+//	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
+//		return productService.updateProduct(id,product);
+//	}
 
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<String> deleteProduct(@PathVariable Long id){
