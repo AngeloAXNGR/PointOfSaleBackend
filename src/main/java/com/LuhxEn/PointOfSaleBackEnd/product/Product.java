@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -27,12 +29,12 @@ public class Product {
 
 	private double purchasePrice;
 	private double sellingPrice;
-	private int stock;
-	private int lowStockThreshold;
+	private int totalStock;
 
-	// YYYY-MM-DD
-	private Date expiration;
-	private int daysBeforeExpiration;
+	private int lowStockThreshold;
+//	// YYYY-MM-DD
+//	private Date expiration;
+//	private int daysBeforeExpiration;
 
 	private boolean isDeleted;
 
