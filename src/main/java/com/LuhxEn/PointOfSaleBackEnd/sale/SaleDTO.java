@@ -57,6 +57,17 @@ public class SaleDTO {
 		private double monthlyTotalRevenue;
 	}
 
+
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class AnnualTotalRevenue{
+		private double annualTotalRevenue;
+	}
+
+
+
 	@Data
 	@Builder
 	@AllArgsConstructor

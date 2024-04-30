@@ -22,6 +22,12 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 		"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE)", nativeQuery = true)
 	double getMonthlyTotalRevenue(@Param("businessId") Long businessId);
 
+	@Query(value = "SELECT COALESCE(SUM(s.grand_total), 0) " +
+		"FROM Sale s " +
+		"WHERE s.business_id = :businessId " +
+		"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE)", nativeQuery = true)
+	double getAnnualTotalRevenue(@Param("businessId") Long businessId);
+
 	@Query(value = "SELECT COALESCE(SUM(s.grand_total),0) " +
 		"FROM Sale s " +
 		"WHERE s.business_id = :businessId " +

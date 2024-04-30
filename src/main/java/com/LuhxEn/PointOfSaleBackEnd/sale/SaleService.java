@@ -300,6 +300,20 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyTotalRevenue);
 	}
 
+	public ResponseEntity<SaleDTO.AnnualTotalRevenue> getAnnualTotalRevenue(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+
+		double overall = saleRepository.getAnnualTotalRevenue(selectedBusiness.getId());
+
+		SaleDTO.AnnualTotalRevenue annualTotalRevenue = SaleDTO.AnnualTotalRevenue
+			.builder()
+			.annualTotalRevenue(overall)
+			.build();
+
+
+		return ResponseEntity.status(HttpStatus.OK).body(annualTotalRevenue);
+	}
+
 	public ResponseEntity<List<SaleDTO.MonthlyRevenuesForTheYear>> getMonthlyRevenuesForTheYear(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
