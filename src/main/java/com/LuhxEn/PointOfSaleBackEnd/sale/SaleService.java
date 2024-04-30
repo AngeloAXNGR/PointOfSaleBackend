@@ -363,6 +363,16 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyProfit);
 	}
 
+	public ResponseEntity<SaleDTO.AnnualProfit> getAnnualProfit(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+		double profitValue = saleRepository.getAnnualProfit(selectedBusiness.getId());
+		SaleDTO.AnnualProfit annualProfit = SaleDTO.AnnualProfit
+			.builder()
+			.annualProfit(profitValue)
+			.build();
+		return ResponseEntity.status(HttpStatus.OK).body(annualProfit);
+	}
+
 	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 

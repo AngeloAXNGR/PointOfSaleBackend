@@ -85,4 +85,9 @@ public class SaleController {
 	public ResponseEntity<SaleDTO.MonthlyProfit> getMonthlyProfit(@PathVariable Long businessId){
 		return saleService.getMonthlyProfit(businessId);
 	}
+
+	@GetMapping("/{businessId}/annualProfit")
+	public ResponseEntity<SaleDTO.AnnualProfit> getAnnualProfit(@PathVariable Long businessId){
+		return saleService.getAnnualProfit(businessId);
+	}
 }

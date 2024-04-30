@@ -99,8 +99,21 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 		, nativeQuery = true)
 	double getDailyProfit(@Param("businessId") Long businessId, @Param("today") LocalDate today);
 
+	@Query(value =
+		"SELECT COALESCE(SUM(s.profit),0) " +
+			"FROM sale s " +
+			"WHERE s.business_id = :businessId " +
+			"AND EXTRACT(MONTH FROM s.transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE) " +
+			"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE)"
 		, nativeQuery = true)
 	Double getMonthlyProfit(@Param("businessId") Long businessId);
 
+	@Query(value =
+		"SELECT COALESCE(SUM(s.profit),0) " +
+			"FROM sale s " +
+			"WHERE s.business_id = :businessId " +
+			"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE)"
+		, nativeQuery = true)
+	Double getAnnualProfit(@Param("businessId") Long businessId);
 
 }
