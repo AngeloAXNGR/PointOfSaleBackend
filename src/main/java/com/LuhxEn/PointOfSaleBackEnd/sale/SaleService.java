@@ -337,6 +337,22 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyRevenues);
 	}
 
+	public ResponseEntity<SaleDTO.DailyProfit> getDailyProfit(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+
+		LocalDate today = LocalDate.now();
+
+
+		double overall = saleRepository.getDailyProfit(selectedBusiness.getId(), today);
+
+		SaleDTO.DailyProfit dailyProfit = SaleDTO.DailyProfit
+			.builder()
+			.dailyProfit(overall)
+			.build();
+
+		return ResponseEntity.status(HttpStatus.OK).body(dailyProfit);
+	}
+
 	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
