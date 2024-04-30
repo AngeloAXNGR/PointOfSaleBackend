@@ -353,6 +353,16 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(dailyProfit);
 	}
 
+	public ResponseEntity<SaleDTO.MonthlyProfit> getMonthlyProfit(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+		double profitValue = saleRepository.getMonthlyProfit(selectedBusiness.getId());
+		SaleDTO.MonthlyProfit monthlyProfit = SaleDTO.MonthlyProfit
+			.builder()
+			.monthlyProfit(profitValue)
+			.build();
+		return ResponseEntity.status(HttpStatus.OK).body(monthlyProfit);
+	}
+
 	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
@@ -463,14 +473,6 @@ public class SaleService {
 
 		return ResponseEntity.status(HttpStatus.OK).body(popularProductDTOS);
 	}
-
-	public ResponseEntity<SaleDTO.Profit> getMonthlyProfit(Long businessId) {
-		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
-		Double profitValue = saleRepository.getMonthlyProfit(selectedBusiness.getId());
-		SaleDTO.Profit profit = new SaleDTO.Profit(profitValue);
-		return ResponseEntity.status(HttpStatus.OK).body(profit);
-	}
-
 
 }
 

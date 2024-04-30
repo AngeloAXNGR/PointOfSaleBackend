@@ -135,4 +135,11 @@ public class SaleDTO {
 		private double dailyProfit;
 	}
 
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class MonthlyProfit{
+		private double monthlyProfit;
+	}
 }
