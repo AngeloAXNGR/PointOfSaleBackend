@@ -373,6 +373,31 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(annualProfit);
 	}
 
+	public ResponseEntity<SaleDTO.RevenueOverview> getRevenueOverview(Long businessId){
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+		LocalDate today = LocalDate.now();
+
+		double dailyTotalRevenue = saleRepository.getDailyTotalRevenue(selectedBusiness.getId(), today);
+		double monthlyTotalRevenue = saleRepository.getMonthlyTotalRevenue(selectedBusiness.getId());
+		double annualTotalRevenue = saleRepository.getAnnualTotalRevenue(selectedBusiness.getId());
+		double dailyProfit = saleRepository.getDailyProfit(selectedBusiness.getId(), today);
+		double monthlyProfit = saleRepository.getMonthlyProfit(selectedBusiness.getId());
+		double annualProfit = saleRepository.getAnnualProfit(selectedBusiness.getId());
+
+		SaleDTO.RevenueOverview revenueOverview = SaleDTO.RevenueOverview
+			.builder()
+			.dailyTotalRevenue(dailyTotalRevenue)
+			.monthlyTotalRevenue(monthlyTotalRevenue)
+			.annualTotalRevenue(annualTotalRevenue)
+			.dailyProfit(dailyProfit)
+			.monthlyProfit(monthlyProfit)
+			.annualProfit(annualProfit)
+			.build();
+
+		return ResponseEntity.status(HttpStatus.OK).body(revenueOverview);
+	}
+
+
 	public ResponseEntity<SaleDTO.DailyTotalProductsSold> getDailyTotalProductsSold(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 

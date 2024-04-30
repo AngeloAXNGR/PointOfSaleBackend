@@ -151,4 +151,18 @@ public class SaleDTO {
 		private double annualProfit;
 	}
 
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class RevenueOverview{
+		private double dailyTotalRevenue;
+		private double monthlyTotalRevenue;
+		private double annualTotalRevenue;
+		private double dailyProfit;
+		private double monthlyProfit;
+		private double annualProfit;
+	}
+
+
 }
