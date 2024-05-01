@@ -102,7 +102,7 @@ public class SaleService {
 			}
 
 
-			int newStock = product.getTotalStock() - totalQuantityCopy;
+			int newStock = batchTotalQuantity - totalQuantityCopy;
 
 			product.setTotalStock(newStock);
 
