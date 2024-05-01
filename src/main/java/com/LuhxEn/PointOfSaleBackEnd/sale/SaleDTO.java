@@ -112,6 +112,17 @@ public class SaleDTO {
 		private int year;
 	}
 
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class ProductsOverview{
+		private int dailyTotalProductsSold;
+		private int monthlyTotalProductsSold;
+		private int annualTotalProductsSold;
+		private int totalStocks;
+	}
+
 
 
 	@Data
