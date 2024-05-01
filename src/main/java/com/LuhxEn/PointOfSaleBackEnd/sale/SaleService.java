@@ -426,6 +426,18 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(monthlyTotalProductsSold);
 	}
 
+	public ResponseEntity<SaleDTO.AnnualTotalProductsSold> getAnnualTotalProductsSold(Long businessId) {
+		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+
+		int totalProductsSold = saleRepository.getAnnualTotalProductsSold(selectedBusiness.getId());
+		SaleDTO.AnnualTotalProductsSold annualTotalProductsSold = SaleDTO.AnnualTotalProductsSold
+			.builder()
+			.annualTotalProductsSold(totalProductsSold)
+			.build();
+
+		return ResponseEntity.status(HttpStatus.OK).body(annualTotalProductsSold);
+	}
+
 	public ResponseEntity<List<SaleDTO.MonthlyTotalSoldForTheYear>> getMonthlySoldForTheYear(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 

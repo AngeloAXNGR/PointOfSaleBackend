@@ -98,6 +98,14 @@ public class SaleDTO {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
+	public static class AnnualTotalProductsSold{
+		private int annualTotalProductsSold;
+	}
+
+	@Data
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
 	public static class MonthlyTotalSoldForTheYear{
 		private int monthlyTotalProductsSold;
 		private int month;

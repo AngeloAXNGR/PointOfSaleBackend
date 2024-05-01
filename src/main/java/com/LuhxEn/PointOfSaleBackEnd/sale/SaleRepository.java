@@ -56,6 +56,13 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 	@Query(value = "SELECT COALESCE(SUM(sp.quantity), 0) " +
 		"FROM sale s " +
 		"JOIN sale_products sp ON s.id = sp.sale_id " +
+		"WHERE EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE) " +
+		"AND s.business_id = :businessId", nativeQuery = true)
+	Integer getAnnualTotalProductsSold(@Param("businessId") Long businessId);
+
+	@Query(value = "SELECT COALESCE(SUM(sp.quantity), 0) " +
+		"FROM sale s " +
+		"JOIN sale_products sp ON s.id = sp.sale_id " +
 		"WHERE EXTRACT(MONTH FROM s.transaction_date) = :month " +
 		"AND EXTRACT(YEAR FROM s.transaction_date) = :year " +
 		"AND s.business_id = :businessId", nativeQuery = true)
