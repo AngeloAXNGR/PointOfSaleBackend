@@ -27,10 +27,10 @@ public class ProductController {
 		return productService.addProducts(businessId, products);
 	}
 
-//	@PutMapping("/update/{id}")
-//	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
-//		return productService.updateProduct(id,product);
-//	}
+	@PatchMapping("/update/{id}")
+	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
+		return productService.updateProduct(id,product);
+	}
 
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<String> deleteProduct(@PathVariable Long id){

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -131,21 +132,29 @@ public class ProductService {
 
 	}
 
-	
-//	public ResponseEntity<Product> updateProduct(Long id, Product product){
-//		return productRepository.findById(id).map(product1 -> {
-//			product1.setProductName(product.getProductName());
-//			product1.setCategoryId(product.getCategoryId());
-//			product1.setPurchasePrice(product.getPurchasePrice());
-//			product1.setSellingPrice(product.getSellingPrice());
-//			product1.setStock(product.getStock());
-//			product1.setLowStockThreshold(product.getLowStockThreshold());
-//			product1.setExpiration(product.getExpiration());
-//			product1.setDaysBeforeExpiration(product.getDaysBeforeExpiration());
-//			Product updatedProduct = productRepository.save(product1);
-//			return ResponseEntity.status(HttpStatus.OK).body(updatedProduct);
-//		}).orElseGet(() -> ResponseEntity.notFound().build());
-//	}
+
+	public ResponseEntity<Product> updateProduct(Long id, Product product){
+		return productRepository.findById(id).map(product1 -> {
+			Field[] fields = Product.class.getDeclaredFields();
+			for (Field field : fields) {
+				try {
+					// Set accessible to true to access private fields
+					field.setAccessible(true);
+					// Get the value of the field from the provided product object
+					Object value = field.get(product);
+					// Update the corresponding field in the existing product object
+					if (value != null && !"totalStock".equals(field.getName())) {
+						field.set(product1, value);
+					}
+				} catch (IllegalAccessException e) {
+					// Handle any exceptions
+					e.printStackTrace();
+				}
+			}
+			Product updatedProduct = productRepository.save(product1);
+			return ResponseEntity.status(HttpStatus.OK).body(updatedProduct);
+		}).orElseGet(() -> ResponseEntity.notFound().build());
+	}
 
 	public ResponseEntity<String> deleteProduct(Long id) {
 		// HARD DELETE
