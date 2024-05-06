@@ -86,6 +86,7 @@ public class ProductService {
 						.expirationDate(productDTO.getExpirationDate())
 						.stock(productDTO.getStock())
 						.product(existingProduct)
+						.batchPurchasePrice(productDTO.getPurchasePrice())
 						.business(selectedBusiness)
 						.build();
 					batches.add(batch);
@@ -109,6 +110,7 @@ public class ProductService {
 					.expirationDate(productDTO.getExpirationDate())
 					.stock(productDTO.getStock())
 					.product(newProduct)
+					.batchPurchasePrice(productDTO.getPurchasePrice())
 					.business(selectedBusiness)
 					.build();
 

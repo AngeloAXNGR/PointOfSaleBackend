@@ -31,5 +31,6 @@ public class Batch {
 	private Date expirationDate;
 	private int stock;
 
+	private double batchPurchasePrice;
 
 }
