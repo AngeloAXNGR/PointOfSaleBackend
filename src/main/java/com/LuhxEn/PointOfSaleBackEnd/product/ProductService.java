@@ -98,6 +98,7 @@ public class ProductService {
 				Product newProduct = Product
 					.builder()
 					.productName(productDTO.getProductName())
+					.categoryId(category.getId())
 					.purchasePrice(productDTO.getPurchasePrice())
 					.sellingPrice(productDTO.getSellingPrice())
 					.totalStock(productDTO.getStock())
