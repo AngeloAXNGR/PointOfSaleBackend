@@ -166,8 +166,14 @@ public class ProductService {
 //		return ResponseEntity.status(HttpStatus.OK).body("Product with the id of " + id + " was deleted.");
 
 		// SOFT DELETE
+
+
+
+
 		return productRepository.findById(id).map(product -> {
 			product.setDeleted(true);
+			List<Batch> batches = batchRepository.getBatch(id);
+			batches.forEach(batch -> {batchRepository.delete(batch);});
 			productRepository.save(product);
 			return ResponseEntity.status(HttpStatus.OK).body("Product with id of " + id + " was deleted.");
 		}).orElseGet(() -> ResponseEntity.notFound().build());
