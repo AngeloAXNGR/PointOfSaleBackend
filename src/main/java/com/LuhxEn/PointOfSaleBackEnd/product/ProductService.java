@@ -64,7 +64,7 @@ public class ProductService {
 			Category category = categoryRepository.findById(productDTO.getCategoryId())
 				.orElseThrow(() -> new CategoryNotFoundException("Category Not Found"));
 
-			Product existingProduct = productRepository.findByProductNameIgnoreCase(productDTO.getProductName());
+			Product existingProduct = productRepository.findByProductNameIgnoreCase(productDTO.getProductName(), selectedBusiness.getId());
 			if (existingProduct != null) {
 				// If Product Exists, we create a batch and provide reference to a product
 				// No need to create a new product, just the batch
