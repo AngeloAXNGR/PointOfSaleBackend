@@ -16,4 +16,9 @@ public class BatchController {
 	public ResponseEntity<BatchDTO.WastageProducts> getWastageProducts(@PathVariable Long businessId){
 		return batchService.getWastageProducts(businessId);
 	}
+
+	@PostMapping("/{productId}/restockProduct")
+	public ResponseEntity<?> restockProduct(@PathVariable Long productId, @RequestBody BatchDTO.RestockProduct restockProduct){
+		return batchService.restockProduct(productId, restockProduct);
+	}
 }
