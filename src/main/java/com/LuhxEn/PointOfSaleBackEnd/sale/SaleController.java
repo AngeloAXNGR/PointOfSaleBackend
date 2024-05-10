@@ -43,8 +43,8 @@ public class SaleController {
 		return saleService.getAnnualTotalRevenue(businessId);
 	}
 
-	@GetMapping("/{businessId}/monthlyRevenuesForTheYear")
-	public ResponseEntity<List<SaleDTO.MonthlyRevenuesForTheYear>> getMonthlyRevenuesForTheYear(@PathVariable Long businessId){
+	@GetMapping("/{businessId}/monthlyRevenueAndProfitForTheYear")
+	public ResponseEntity<List<SaleDTO.MonthlyRevenueAndProfits>> getMonthlyRevenuesForTheYear(@PathVariable Long businessId){
 		return saleService.getMonthlyRevenuesForTheYear(businessId);
 	}
 

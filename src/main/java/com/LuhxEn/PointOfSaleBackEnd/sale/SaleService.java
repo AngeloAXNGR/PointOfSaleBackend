@@ -314,22 +314,25 @@ public class SaleService {
 		return ResponseEntity.status(HttpStatus.OK).body(annualTotalRevenue);
 	}
 
-	public ResponseEntity<List<SaleDTO.MonthlyRevenuesForTheYear>> getMonthlyRevenuesForTheYear(Long businessId) {
+	public ResponseEntity<List<SaleDTO.MonthlyRevenueAndProfits>> getMonthlyRevenuesForTheYear(Long businessId) {
 		Business selectedBusiness = businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
 
-		List<SaleDTO.MonthlyRevenuesForTheYear> monthlyRevenues = new ArrayList<>();
+		List<SaleDTO.MonthlyRevenueAndProfits> monthlyRevenues = new ArrayList<>();
+
 
 		LocalDate currentDate = LocalDate.now();
 		int currentYear = currentDate.getYear();
 
 		for (int month = 1; month <= 12; month++) {
 			double totalRevenue = saleRepository.getMonthlyRevenuesForTheYear(selectedBusiness.getId(), currentYear, month);
+			double totalProfit = saleRepository.getMonthlyProfitsForTheYear(selectedBusiness.getId(), currentYear,month);
 
-			SaleDTO.MonthlyRevenuesForTheYear revenues = SaleDTO.MonthlyRevenuesForTheYear
+			SaleDTO.MonthlyRevenueAndProfits revenues = SaleDTO.MonthlyRevenueAndProfits
 				.builder()
 				.year(currentYear)
 				.month(month)
 				.monthlyRevenuesForTheYear(totalRevenue)
+				.monthlyProfitsForTheYear(totalProfit)
 				.build();
 			monthlyRevenues.add(revenues);
 		}

@@ -36,6 +36,14 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 	)
 	double getMonthlyRevenuesForTheYear(@Param("businessId") Long businessId, @Param("year") int year, @Param("month") int month);
 
+	@Query(value = "SELECT COALESCE(SUM(s.profit),0) " +
+		"FROM Sale s " +
+		"WHERE s.business_id = :businessId " +
+		"AND EXTRACT(MONTH FROM s.transaction_date) = :month " +
+		"AND EXTRACT(YEAR FROM s.transaction_date) = :year", nativeQuery = true
+	)
+	double getMonthlyProfitsForTheYear(@Param("businessId") Long businessId, @Param("year") int year, @Param("month") int month);
+
 	@Query(value = "SELECT COALESCE(SUM(sp.quantity),0) " +
 		"FROM sale s " +
 		"JOIN sale_products sp ON s.id = sp.sale_id " +

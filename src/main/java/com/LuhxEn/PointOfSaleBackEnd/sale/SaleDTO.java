@@ -72,8 +72,9 @@ public class SaleDTO {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public static class MonthlyRevenuesForTheYear{
+	public static class MonthlyRevenueAndProfits{
 		private double monthlyRevenuesForTheYear;
+		private double monthlyProfitsForTheYear;
 		private int month;
 		private int year;
 	}
