@@ -171,6 +171,7 @@ public class ProductService {
 
 
 		return productRepository.findById(id).map(product -> {
+			product.setTotalStock(0);
 			product.setDeleted(true);
 			List<Batch> batches = batchRepository.getBatch(id);
 			batches.forEach(batch -> {batchRepository.delete(batch);});
