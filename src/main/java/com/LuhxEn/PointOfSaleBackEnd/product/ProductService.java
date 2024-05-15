@@ -47,7 +47,18 @@ public class ProductService {
 //	}
 
 	public ResponseEntity<List<Product>> getProducts(Long businessId) {
-		List<Product> products = productRepository.getProductsAsc(businessId);
+		List<Product> products = new ArrayList<>();
+		List<Product> products1 = productRepository.getProductsAsc(businessId);
+
+		// NEEDS REVISIONING (POSSIBLY INEFFICIENT)
+		// MANUALLY UPDATING TOTAL STOCK DUE TO THE POSSIBILITY OF BATCHES BEING EXPIRED
+		for(Product product : products1){
+			int totalStock = batchRepository.getTotalStock(product.getId());
+			product.setTotalStock(totalStock);
+			products.add(product);
+		}
+
+		productRepository.saveAll(products);
 		return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 
