@@ -18,32 +18,32 @@ public class ProductController {
 	private final ProductService productService;
 
 	@GetMapping("/{businessId}")
-	public ResponseEntity<List<Product>> getProducts(@PathVariable Long businessId){
+	public ResponseEntity<List<Product>> getProducts(@PathVariable Long businessId) {
 		return productService.getProducts(businessId);
 	}
 
 	@GetMapping("/{businessId}/paginated")
 	public ResponseEntity<ProductResponse> getProductsPaginated(@PathVariable Long businessId
+		, @RequestParam(defaultValue = "0") String keyword
 		, @RequestParam(defaultValue = "0") int page
 		, @RequestParam(defaultValue = "0") int size
-	){
-		return productService.getProductsPaginated(businessId, page, size);
+	) {
+		return productService.getProductsPaginated(businessId, keyword, page, size);
 	}
 
 
-
 	@PostMapping("/{businessId}/create")
-	public ResponseEntity<?> addProducts(@PathVariable Long businessId, @RequestBody List<ProductDTO.ProductRequest> products){
+	public ResponseEntity<?> addProducts(@PathVariable Long businessId, @RequestBody List<ProductDTO.ProductRequest> products) {
 		return productService.addProducts(businessId, products);
 	}
 
 	@PatchMapping("/update/{id}")
-	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
-		return productService.updateProduct(id,product);
+	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
+		return productService.updateProduct(id, product);
 	}
 
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<String> deleteProduct(@PathVariable Long id){
+	public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
 		return productService.deleteProduct(id);
 	}
 

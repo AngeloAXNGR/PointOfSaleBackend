@@ -65,9 +65,15 @@ public class ProductService {
 		return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 
-	public ResponseEntity<ProductResponse> getProductsPaginated(Long businessId, int page, int size){
+	public ResponseEntity<ProductResponse> getProductsPaginated(Long businessId, String keyword, int page, int size){
+		// if keyword query value is empty, its default value is 0
+		// As a result, optional keyword query is not going to work as intended
+		if(keyword.equals("0")) {
+			keyword = "";
+		}
+
 		Pageable pageable = PageRequest.of(page, size);
-		Page<Product> products = productRepository.getProductsPaginated(businessId, pageable);
+		Page<Product> products = productRepository.getProductsPaginated(businessId, keyword,pageable);
 		List<Product> products1 = products.getContent();
 
 		ProductResponse productResponse = ProductResponse
