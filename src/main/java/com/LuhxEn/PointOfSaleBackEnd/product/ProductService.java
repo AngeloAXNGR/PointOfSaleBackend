@@ -15,6 +15,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -60,6 +63,24 @@ public class ProductService {
 
 		productRepository.saveAll(products);
 		return ResponseEntity.status(HttpStatus.OK).body(products);
+	}
+
+	public ResponseEntity<ProductResponse> getProductsPaginated(Long businessId, int page, int size){
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Product> products = productRepository.getProductsPaginated(businessId, pageable);
+		List<Product> products1 = products.getContent();
+
+		ProductResponse productResponse = ProductResponse
+			.builder()
+			.content(products1)
+			.pageNo(products.getNumber())
+			.pageSize(products.getSize())
+			.totalElements(products.getTotalElements())
+			.totalPages(products.getTotalPages())
+			.last(products.isLast())
+			.build();
+
+		return ResponseEntity.status(HttpStatus.OK).body(productResponse);
 	}
 
 	public ResponseEntity<?> addProducts(Long businessId, List<ProductDTO.ProductRequest> productDTOs) {

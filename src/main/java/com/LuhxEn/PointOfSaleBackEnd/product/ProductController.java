@@ -22,6 +22,16 @@ public class ProductController {
 		return productService.getProducts(businessId);
 	}
 
+	@GetMapping("/{businessId}/paginated")
+	public ResponseEntity<ProductResponse> getProductsPaginated(@PathVariable Long businessId
+		, @RequestParam(defaultValue = "0") int page
+		, @RequestParam(defaultValue = "0") int size
+	){
+		return productService.getProductsPaginated(businessId, page, size);
+	}
+
+
+
 	@PostMapping("/{businessId}/create")
 	public ResponseEntity<?> addProducts(@PathVariable Long businessId, @RequestBody List<ProductDTO.ProductRequest> products){
 		return productService.addProducts(businessId, products);
