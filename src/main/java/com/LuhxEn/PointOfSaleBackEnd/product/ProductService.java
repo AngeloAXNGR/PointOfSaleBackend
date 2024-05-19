@@ -55,7 +55,7 @@ public class ProductService {
 
 		// NEEDS REVISIONING (POSSIBLY INEFFICIENT)
 		// MANUALLY UPDATING TOTAL STOCK DUE TO THE POSSIBILITY OF BATCHES BEING EXPIRED
-		for(Product product : products1){
+		for (Product product : products1) {
 			int totalStock = batchRepository.getTotalStock(product.getId());
 			product.setTotalStock(totalStock);
 			products.add(product);
@@ -65,20 +65,31 @@ public class ProductService {
 		return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 
-	public ResponseEntity<ProductResponse> getProductsPaginated(Long businessId, String keyword, int page, int size){
+	public ResponseEntity<ProductResponse> getProductsPaginated(Long businessId, String keyword, int page, int size) {
 		// if keyword query value is empty, its default value is 0
 		// As a result, optional keyword query is not going to work as intended
-		if(keyword.equals("0")) {
+		if (keyword.equals("0")) {
 			keyword = "";
 		}
 
 		Pageable pageable = PageRequest.of(page, size);
-		Page<Product> products = productRepository.getProductsPaginated(businessId, keyword,pageable);
+		Page<Product> products = productRepository.getProductsPaginated(businessId, keyword, pageable);
 		List<Product> products1 = products.getContent();
+		List<Product> products2 = new ArrayList<>();
+
+		// NEEDS REVISIONING (POSSIBLY INEFFICIENT)
+		// MANUALLY UPDATING TOTAL STOCK DUE TO THE POSSIBILITY OF BATCHES BEING EXPIRED
+		for (Product product : products1) {
+			int totalStock = batchRepository.getTotalStock(product.getId());
+			product.setTotalStock(totalStock);
+			products2.add(product);
+		}
+
+		productRepository.saveAll(products2);
 
 		ProductResponse productResponse = ProductResponse
 			.builder()
-			.content(products1)
+			.content(products2)
 			.pageNo(products.getNumber())
 			.pageSize(products.getSize())
 			.totalElements(products.getTotalElements())
@@ -171,7 +182,7 @@ public class ProductService {
 	}
 
 
-	public ResponseEntity<Product> updateProduct(Long id, Product product){
+	public ResponseEntity<Product> updateProduct(Long id, Product product) {
 		return productRepository.findById(id).map(product1 -> {
 			Field[] fields = Product.class.getDeclaredFields();
 			for (Field field : fields) {
@@ -206,13 +217,13 @@ public class ProductService {
 		// SOFT DELETE
 
 
-
-
 		return productRepository.findById(id).map(product -> {
 			product.setTotalStock(0);
 			product.setDeleted(true);
 			List<Batch> batches = batchRepository.getBatch(id);
-			batches.forEach(batch -> {batchRepository.delete(batch);});
+			batches.forEach(batch -> {
+				batchRepository.delete(batch);
+			});
 			productRepository.save(product);
 			return ResponseEntity.status(HttpStatus.OK).body("Product with id of " + id + " was deleted.");
 		}).orElseGet(() -> ResponseEntity.notFound().build());
