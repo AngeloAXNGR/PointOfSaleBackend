@@ -60,7 +60,7 @@ public class BatchService {
 			batchRepository.save(batchToUpdate);
 			selectedProduct.setTotalStock(selectedProduct.getTotalStock() + restockProduct.getStock());
 			productRepository.save(selectedProduct);
-			return ResponseEntity.status(HttpStatus.OK).body(batchToUpdate);
+			return ResponseEntity.status(HttpStatus.OK).body(selectedProduct);
 		} else {
 			Batch batch = Batch
 				.builder()
@@ -73,7 +73,7 @@ public class BatchService {
 			batchRepository.save(batch);
 			selectedProduct.setTotalStock(selectedProduct.getTotalStock() + restockProduct.getStock());
 			productRepository.save(selectedProduct);
-			return ResponseEntity.status(HttpStatus.OK).body(batch);
+			return ResponseEntity.status(HttpStatus.OK).body(selectedProduct);
 		}
 
 	}
