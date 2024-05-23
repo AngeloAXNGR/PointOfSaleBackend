@@ -14,8 +14,8 @@ public class SaleController {
 	private final SaleService saleService;
 
 	@PostMapping("/{businessId}/create")
-	public ResponseEntity<?> createSale(@PathVariable Long businessId, @RequestBody List<SaleDTO.SaleRequest> saleRequestDTOs){
-		return saleService.createSale(businessId, saleRequestDTOs);
+	public ResponseEntity<?> createSale(@PathVariable Long businessId, @RequestBody SaleDTO.SaleRequest saleRequestDTO){
+		return saleService.createSale(businessId, saleRequestDTO);
 	}
 
 	@GetMapping("/{businessId}")

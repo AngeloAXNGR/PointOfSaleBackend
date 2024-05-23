@@ -19,7 +19,9 @@ public class Sale {
 	private Long id;
 	private Date transactionDate;
 	private double grandTotal;
+	private double recomputedGrandTotal;
 	private double profit;
+	private double discount;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "sale_id")

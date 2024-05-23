@@ -35,8 +35,10 @@ public class SaleService {
 
 	@Transactional
 	// Should some db query operations fail, the process of creating a sale would fail altogether to ensure ACID compliance
-	public ResponseEntity<?> createSale(Long businessId, List<SaleDTO.SaleRequest> saleRequestDTOs) {
-		if (saleRequestDTOs.isEmpty()) {
+	public ResponseEntity<?> createSale(Long businessId, SaleDTO.SaleRequest saleRequestDTO) {
+		List<SaleDTO.CartItem> cartItems = saleRequestDTO.getCartItems();
+
+		if (cartItems.isEmpty()) {
 			// Return a response indicating that the request is invalid
 			return ResponseEntity.badRequest().body("Bad Request");
 		}
@@ -50,10 +52,10 @@ public class SaleService {
 
 		// Initial Sale GrandTotal (To be recomputed later)
 		double grandTotal = 0;
+		double recomputedGrandTotal = 0;
 
 		double costOfGoodsSold = 0;
 
-		double profit = 0;
 
 		// Set transaction date to the current date and time
 		sale.setTransactionDate(new Date());
@@ -64,9 +66,9 @@ public class SaleService {
 
 
 		// Loop through the request body (list of SaleRequestDTO objects)
-		for (SaleDTO.SaleRequest saleRequestDTO : saleRequestDTOs) {
-			Long productId = saleRequestDTO.getProductId();
-			int totalQuantity = saleRequestDTO.getQuantity();
+		for (SaleDTO.CartItem cartItem : cartItems) {
+			Long productId = cartItem.getProductId();
+			int totalQuantity = cartItem.getQuantity();
 			int totalQuantityCopy = totalQuantity;
 
 
@@ -143,7 +145,19 @@ public class SaleService {
 
 		sale.setGrandTotal(grandTotal);
 
-		sale.setProfit(grandTotal - costOfGoodsSold);
+		sale.setDiscount(saleRequestDTO.getDiscount());
+
+		recomputedGrandTotal = grandTotal - saleRequestDTO.getDiscount();
+
+		sale.setRecomputedGrandTotal(recomputedGrandTotal);
+
+		double profit = recomputedGrandTotal - costOfGoodsSold;
+
+		if(profit < 0){
+			sale.setProfit(0);
+		}else{
+			sale.setProfit(profit);
+		}
 
 		// Save the sale entity along with associated sale products
 		sale = saleRepository.save(sale);

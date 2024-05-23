@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,14 +22,33 @@ public class SaleDTO {
 		private double subtotal;
 	}
 
+//	@Data
+//	@AllArgsConstructor
+//	@NoArgsConstructor
+//	public static class SaleRequest {
+//		@NotNull
+//		private Long productId;
+//		private int quantity;
+//	}
+
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public static class SaleRequest {
+	public static class CartItem {
 		@NotNull
 		private Long productId;
 		private int quantity;
 	}
+
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class SaleRequest {
+		private List<CartItem> cartItems = new ArrayList<>();
+		private double discount;
+	}
+
 
 	@Data
 	@Builder
