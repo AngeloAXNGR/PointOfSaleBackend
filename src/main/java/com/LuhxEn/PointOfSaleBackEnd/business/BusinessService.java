@@ -1,5 +1,7 @@
 package com.LuhxEn.PointOfSaleBackEnd.business;
 
+import com.LuhxEn.PointOfSaleBackEnd.batch.Batch;
+import com.LuhxEn.PointOfSaleBackEnd.batch.BatchRepository;
 import com.LuhxEn.PointOfSaleBackEnd.category.Category;
 import com.LuhxEn.PointOfSaleBackEnd.config.JwtService;
 import com.LuhxEn.PointOfSaleBackEnd.user.User;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +25,7 @@ public class BusinessService {
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final BusinessRepository businessRepository;
+	private final BatchRepository batchRepository;
 
 	public ResponseEntity<List<BusinessDTO>> getBusinesses(HttpServletRequest request){
 		User user = getUser(request);
@@ -64,7 +68,14 @@ public class BusinessService {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Business with the id of " + id + " was not found.");
 		}
 
+		List<Batch> batches = batchRepository.getBatchByBusinessId(id);
+
+		for(Batch batch : batches){
+			batchRepository.delete(batch);
+		}
+
 		businessRepository.deleteById(id);
+
 		return ResponseEntity.status(HttpStatus.OK).body("Business with the id of " + id + " was deleted.");
 	}
 

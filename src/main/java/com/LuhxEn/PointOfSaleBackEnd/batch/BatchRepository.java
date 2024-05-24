@@ -25,4 +25,7 @@ public interface BatchRepository extends JpaRepository<Batch, Long> {
 
 	@Query(value = "SELECT COALESCE(SUM(stock),0), COALESCE(SUM(stock * batch_purchase_price),0) FROM batch WHERE business_id = :businessId AND DATE(expiration_date) < CURRENT_DATE AND stock > 0", nativeQuery = true)
 	Object getWastageProducts(Long businessId);
+
+	@Query(value = "SELECT * FROM batch WHERE business_id = :businessId", nativeQuery = true)
+	List<Batch> getBatchByBusinessId(Long businessId);
 }
