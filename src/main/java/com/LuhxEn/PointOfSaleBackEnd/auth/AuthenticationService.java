@@ -9,10 +9,12 @@ import com.LuhxEn.PointOfSaleBackEnd.user.User;
 import com.LuhxEn.PointOfSaleBackEnd.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -31,7 +33,7 @@ public class AuthenticationService {
 	private final JwtService jwtService;
 	private final AuthenticationManager authenticationManager;
 
-	public AuthenticationResponse register(RegisterRequest request) {
+	public AuthenticationResponse register(RegisterRequest request, HttpServletResponse response) {
 		var user = User.builder()
 			.firstname(request.getFirstname())
 			.lastname(request.getLastname())
@@ -45,13 +47,30 @@ public class AuthenticationService {
 		var refreshToken = jwtService.generateRefreshToken(user);
 		saveUserToken(savedUser, jwtToken);
 
+		ResponseCookie cookie = ResponseCookie.from("accessToken", jwtToken)
+			.httpOnly(true)
+			.secure(false)
+			.path("/")
+			.maxAge(24 * 60 * 60)
+			.build();
+		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+		ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+			.httpOnly(true)
+			.secure(false)
+			.path("/")
+			.maxAge(7 * 24 * 60 * 60)
+			.build();
+		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
 		return AuthenticationResponse.builder()
 			.accessToken(jwtToken)
 			.refreshToken(refreshToken)
 			.build();
 	}
 
-	public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
+	public AuthenticationResponse authenticate(AuthenticationRequest request, HttpServletResponse response) {
 		try {
 			authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
@@ -65,6 +84,22 @@ public class AuthenticationService {
 			var refreshToken = jwtService.generateRefreshToken(user);
 			revokeAllUserTokens(user);
 			saveUserToken(user, jwtToken);
+
+			ResponseCookie cookie = ResponseCookie.from("accessToken", jwtToken)
+				.httpOnly(true)
+				.secure(false)
+				.path("/")
+				.maxAge(24 * 60 * 60)
+				.build();
+			response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+			ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+				.httpOnly(true)
+				.secure(false)
+				.path("/")
+				.maxAge(7 * 24 * 60 * 60)
+				.build();
+			response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
 			return AuthenticationResponse.builder()
 				.accessToken(jwtToken)
@@ -107,24 +142,43 @@ public class AuthenticationService {
 	) throws IOException {
 		try {
 			System.out.println("refreshToken method ran");
-			final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-			final String refreshToken;
-			final String userEmail;
-
-			if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-				return;
+			String refreshToken = null;
+			String userEmail;
+			if(request.getCookies() != null){
+				for(Cookie cookie: request.getCookies()){
+					if(cookie.getName().equals("refreshToken")){
+						refreshToken = cookie.getValue();
+					}
+				}
 			}
 
-			refreshToken = authHeader.substring(7);
 			userEmail = jwtService.extractUsername(refreshToken);
 			if (userEmail != null) {
 				var user = this.repository.findByEmail(userEmail).orElseThrow();
 
 				if (jwtService.isTokenValid(refreshToken, user)) {
-				var accessToken = jwtService.generateToken(user);
+					var accessToken = jwtService.generateToken(user);
 //					var accessToken = jwtService.generateToken2(user);
 					revokeAllUserTokens(user);
 					saveUserToken(user, accessToken);
+
+					ResponseCookie cookie = ResponseCookie.from("accessToken", accessToken)
+						.httpOnly(true)
+						.secure(false)
+						.path("/")
+						.maxAge(24 * 60 * 60)
+						.build();
+					response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+					ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+						.httpOnly(true)
+						.secure(false)
+						.path("/")
+						.maxAge(7 * 24 * 60 * 60)
+						.build();
+					response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+
 					var authResponse = AuthenticationResponse.builder()
 						.accessToken(accessToken)
 						.refreshToken(refreshToken)

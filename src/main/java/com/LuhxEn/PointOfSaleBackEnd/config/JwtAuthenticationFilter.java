@@ -5,6 +5,7 @@ import com.LuhxEn.PointOfSaleBackEnd.user.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -40,22 +41,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				return;
 			}
 
-			// getting request header details
-			final String authHeader = request.getHeader("Authorization");
-			final String jwt;
-			final String userEmail;
 
-			// proceed to next request chain if request header is null OR if request header authorization starting string is not 'Bearer '
-			if(authHeader == null || !authHeader.startsWith("Bearer ")){
+			final String userEmail;
+			String token = null;
+
+			if(request.getCookies() != null){
+				for(Cookie cookie: request.getCookies()){
+					if(cookie.getName().equals("accessToken")){
+						token = cookie.getValue();
+					}
+				}
+			}
+
+			if(token == null){
 				filterChain.doFilter(request, response);
 				return;
 			}
 
-			// Extract the jwt after the string 'Bearer '
-			jwt = authHeader.substring(7);
-
-			// get username from jwt claims
-			userEmail = jwtService.extractUsername(jwt);
+			userEmail = jwtService.extractUsername(token);
+			System.out.println("User Email " + userEmail);
 
 			// check if user exists and if it is not yet logged in
 			//SecurityContextHolder.getContext().getAuthentication() returns an authentication object
@@ -65,16 +69,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				// get matching user from the database based on provided email
 				User userDetails = (User) this.userDetailsService.loadUserByUsername(userEmail);
 
-				// find matching token within the database
-				// return true if it is not expired or revoked
-				// otherwise, return false
-				var isTokenValid = tokenRepository.findByToken(jwt)
+				var isTokenValid = tokenRepository.findByToken(token)
 					.map(t -> !t.isExpired() && !t.isRevoked())
 					.orElse(false);
 
-				// if user and token valid
-				// update auth token (update security context) in a way that the token can be usable on our app's authenticated api endpoints
-				if(jwtService.isTokenValid(jwt, userDetails) && isTokenValid){
+				if(jwtService.isTokenValid(token, userDetails) && isTokenValid){
 					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
 						userDetails,
 						null,

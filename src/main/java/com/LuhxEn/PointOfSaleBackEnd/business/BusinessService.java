@@ -6,6 +6,7 @@ import com.LuhxEn.PointOfSaleBackEnd.category.Category;
 import com.LuhxEn.PointOfSaleBackEnd.config.JwtService;
 import com.LuhxEn.PointOfSaleBackEnd.user.User;
 import com.LuhxEn.PointOfSaleBackEnd.user.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -88,11 +89,23 @@ public class BusinessService {
 		businessDTO.setContactNumber(business.getContactNumber());
 		return businessDTO;
 	}
-
+	
 	private User getUser(HttpServletRequest request){
-		String authHeader = request.getHeader("Authorization");
-		String jwt = authHeader.substring(7);
-		Long userId = Long.valueOf(jwtService.extractId(jwt));
+		String token = null;
+		if(request.getCookies() != null){
+			for(Cookie cookie: request.getCookies()){
+				if(cookie.getName().equals("accessToken")){
+					token = cookie.getValue();
+				}
+			}
+		}
+
+		if(token == null){
+			return null;
+		}
+
+		String userEmail = jwtService.extractUsername(token);
+		Long userId = Long.valueOf(jwtService.extractId(token));
 		return userRepository.getReferenceById(userId);
 	}
 
