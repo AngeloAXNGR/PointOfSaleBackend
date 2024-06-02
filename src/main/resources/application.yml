@@ -1,13 +1,17 @@
 spring:
   datasource:
     # DB Credentials (FOR TESTING ONLY)
-    url: jdbc:postgresql://localhost:5433/pointOfSaleDatabase?prepareThreshold=0
-    username: postgres
-    password: KxQwerAdFS156
+    #    url: jdbc:postgresql://localhost:5433/pointOfSaleDatabase?prepareThreshold=0
+    #    username: postgres
+    #    password: KxQwerAdFS156
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      #      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -20,13 +24,13 @@ application:
     jwt:
       # This secret key is for local testing only, doesn't matter if this gets pushed in the repository
       # Just make sure not to provide this value under any environments in the repository
-      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      secret-key: ${SECRET_KEY}
       expiration: 86400000 # one day
-#      expiration: 60 # one minute
       refresh-token:
         expiration:  604800000 # one week
-#        expiration: 60 # one minute
 
 logging:
   level:
     org.springframework.security: DEBUG
+
+
