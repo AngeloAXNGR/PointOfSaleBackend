@@ -76,11 +76,24 @@ public class ProductService {
 		Page<Product> products = productRepository.getProductsPaginated(businessId, keyword, pageable);
 		List<Product> products1 = products.getContent();
 		List<Product> products2 = new ArrayList<>();
+		HashMap<Integer, Integer> productsTotalStock = new HashMap<>();
+		List<Long> productIds = new ArrayList<>();
 
-		// NEEDS REVISIONING (POSSIBLY INEFFICIENT)
-		// MANUALLY UPDATING TOTAL STOCK DUE TO THE POSSIBILITY OF BATCHES BEING EXPIRED
+		
+		for(Product product : products1){
+			productIds.add(product.getId());
+		}
+
+		List<Object[]> totalStocks = batchRepository.getTotalStockByProductIds(productIds);
+
+		for(Object[] totalStock : totalStocks){
+			Long productId = (Long) totalStock[0];
+			Long total = (Long) totalStock[1];
+			productsTotalStock.put(productId.intValue(), total.intValue());
+		}
+
 		for (Product product : products1) {
-			int totalStock = batchRepository.getTotalStock(product.getId());
+			int totalStock = productsTotalStock.getOrDefault(product.getId().intValue(),0);
 			product.setTotalStock(totalStock);
 			products2.add(product);
 		}
