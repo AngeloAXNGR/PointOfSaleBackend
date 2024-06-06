@@ -13,7 +13,8 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "${cors.allowed-origin}")
 public class AuthenticationController {
 	private final AuthenticationService service;
 	private final LogoutService logoutService;

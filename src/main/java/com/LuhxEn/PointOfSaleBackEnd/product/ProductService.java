@@ -79,7 +79,7 @@ public class ProductService {
 		HashMap<Integer, Integer> productsTotalStock = new HashMap<>();
 		List<Long> productIds = new ArrayList<>();
 
-		
+
 		for(Product product : products1){
 			productIds.add(product.getId());
 		}
