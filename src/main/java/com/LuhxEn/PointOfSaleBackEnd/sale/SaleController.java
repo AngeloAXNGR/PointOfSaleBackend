@@ -19,8 +19,8 @@ public class SaleController {
 	}
 
 	@GetMapping("/{businessId}")
-	public ResponseEntity<List<SaleDTO.SaleResponse>> getAllSales(@PathVariable Long businessId) {
-		return saleService.getAllSales(businessId);
+	public ResponseEntity<SaleResponse> getSalesPaginated(@PathVariable Long businessId, int page, int size) {
+		return saleService.getSalesPaginated(businessId, page, size);
 	}
 
 //	@GetMapping("/{businessId}/est")

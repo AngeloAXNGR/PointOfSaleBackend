@@ -1,5 +1,7 @@
 package com.LuhxEn.PointOfSaleBackEnd.sale;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -130,5 +132,9 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 			"AND EXTRACT(YEAR FROM s.transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE)"
 		, nativeQuery = true)
 	Double getAnnualProfit(@Param("businessId") Long businessId);
+
+
+	@Query(value = "SELECT * FROM sale s WHERE business_id = :businessId ORDER BY transaction_date DESC", nativeQuery = true)
+	Page<Sale> getSalesPaginated(@Param("businessId") Long businessId, Pageable pageable);
 
 }

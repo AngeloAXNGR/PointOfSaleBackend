@@ -13,6 +13,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -180,28 +183,32 @@ public class SaleService {
 	}
 
 
-	public ResponseEntity<List<SaleDTO.SaleResponse>> getAllSales(Long businessId) {
-		try {
-			Business selectedBusiness = businessRepository.getReferenceById(businessId);
+	public ResponseEntity<SaleResponse> getSalesPaginated(Long businessId, int page, int size){
+		businessRepository.findById(businessId).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
+		Pageable pageable = PageRequest.of(page,size);
+		Page<Sale> salesPaginated = saleRepository.getSalesPaginated(businessId, pageable);
+		List<Sale> sales = salesPaginated.getContent();
+		List<SaleDTO.SaleResponse> saleResponseDTOs = sales.stream()
+			.map(sale -> {
+				SaleDTO.SaleResponse saleResponseDTO = new SaleDTO.SaleResponse();
+				saleResponseDTO.setSaleId(sale.getId());
+				saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
+				saleResponseDTO.setTransactionDate(sale.getTransactionDate());
+				saleResponseDTO.setGrandTotal(sale.getGrandTotal());
+				return saleResponseDTO;
+			})
+			.collect(Collectors.toList());
 
-			List<Sale> sales = new ArrayList<>(selectedBusiness.getSales());
-
-			List<SaleDTO.SaleResponse> saleResponseDTOs = sales.stream()
-				.map(sale -> {
-					SaleDTO.SaleResponse saleResponseDTO = new SaleDTO.SaleResponse();
-					saleResponseDTO.setSaleId(sale.getId());
-					saleResponseDTO.setProducts(convertProductsToDTOs(sale.getSaleProduct()));
-					saleResponseDTO.setTransactionDate(sale.getTransactionDate());
-					saleResponseDTO.setGrandTotal(sale.getGrandTotal());
-					return saleResponseDTO;
-				})
-				.collect(Collectors.toList());
-
-			return ResponseEntity.ok(saleResponseDTOs);
-		} catch (Exception e) {
-			throw new BusinessNotFoundException("Business Not Found.");
-		}
-
+		SaleResponse saleResponse = SaleResponse
+			.builder()
+			.content(saleResponseDTOs)
+			.pageNo(salesPaginated.getNumber())
+			.pageSize(salesPaginated.getSize())
+			.totalElements(salesPaginated.getTotalElements())
+			.totalPages(salesPaginated.getTotalPages())
+			.last(salesPaginated.isLast())
+			.build();
+		return ResponseEntity.ok(saleResponse);
 	}
 
 	// Helper method to convert products to DTOs
